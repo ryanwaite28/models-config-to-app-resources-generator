@@ -1,0 +1,146 @@
+{
+
+  "$schema": "./models.schema.json",
+
+  "models": {
+    "S3Object": {
+      "tableName": "s3objects",
+      "fields": {
+        "id": { "type": "integer", "required": true, "primaryKey": true },
+        "metadata": { "type": "jsonb", "required": false },
+        "create_at": { "type": "datetime", "required": true, "defaultValue": "now" },
+        "updated_at": { "type": "datetime", "required": false, "defaultValue": "now" },
+        "deleted_at": { "type": "datetime", "required": false, "defaultValue": null },
+
+        "model_type": { "type": "string", "required": false },
+        "model_id": { "type": "integer", "required": false },
+        "mimetype": { "type": "string", "maxLength": 500, "required": false },
+        "is_private": { "type": "boolean", "required": true, "defaultValue": false },
+        "region": { "type": "string", "required": true },
+        "bucket": { "type": "string", "required": true },
+        "key": { "type": "string", "required": true }
+      },
+      "indexes": [
+        { "fields": ["region", "bucket", "key"], "unique": true }
+      ]
+    },
+    
+    "User": {
+      "tableName": "users",
+      "fields": {
+        "id": { "type": "integer", "required": true, "primaryKey": true },
+        "metadata": { "type": "jsonb", "required": false },
+        "create_at": { "type": "datetime", "required": true, "defaultValue": "now" },
+        "updated_at": { "type": "datetime", "required": false, "defaultValue": "now" },
+        "deleted_at": { "type": "datetime", "required": false, "defaultValue": null },
+
+        "stripe_customer_account_id": { "type": "string", "required": false },
+        "stripe_account_id": { "type": "string", "required": false },
+        "stripe_account_verified": { "type": "boolean", "required": true, "defaultValue": false },
+        "stripe_identity_verified": { "type": "boolean", "required": true, "defaultValue": false },
+        "first_name": { "type": "string", "required": false },
+        "last_name": { "type": "string", "required": false },
+        "bio": { "type": "string", "required": false },
+        "icon_s3object_id": { "type": "integer", "required": false, "unique": true },
+        "town": { "type": "string", "required": false },
+        "city": { "type": "string", "required": false },
+        "state": { "type": "string", "required": false },
+        "zipcode": { "type": "integer", "required": false },
+        "country": { "type": "string", "required": false },
+        "tags": { "type": "text", "required": false },
+        "specialties": { "type": "text", "required": false },
+        "person_verified": { "type": "boolean", "required": true, "defaultValue": false },
+        "email_verified": { "type": "boolean", "required": true, "defaultValue": false },
+        "phone_verified": { "type": "boolean", "required": true, "defaultValue": false }
+      },
+      "indexes": {
+
+      }
+    },
+
+    "UserAuthProvider": {
+      "tableName": "users",
+      "fields": {
+        "id": { "type": "integer", "required": true, "primaryKey": true },
+        "metadata": { "type": "jsonb", "required": false },
+        "create_at": { "type": "datetime", "required": true, "defaultValue": "now" },
+        "updated_at": { "type": "datetime", "required": false, "defaultValue": "now" },
+        "deleted_at": { "type": "datetime", "required": false, "defaultValue": null },
+
+        "details": { "type": "jsonb", "required": false },
+        "user_id": { "type": "integer", "required": true },
+        "provider_name": { "type": "string", "required": true },
+        "provider_id": { "type": "string", "required": true }
+      },
+      "relationships": {
+        "S3Object": { "type": "belongsTo", "model": "User", "alias": "authPro", "foreignKey": "icon_s3object_id", "sourceKey": "id" }
+      },
+      "indexes": {
+
+      }
+    },
+
+    "Tag": {
+      "tableName": "tags",
+      "fields": {
+        "id": { "type": "integer", "required": true, "primaryKey": true },
+        "metadata": { "type": "jsonb", "required": false },
+        "create_at": { "type": "datetime", "required": true, "defaultValue": "now" },
+        "updated_at": { "type": "datetime", "required": false, "defaultValue": "now" },
+        "deleted_at": { "type": "datetime", "required": false, "defaultValue": null },
+
+        "name": { "type": "string", "required": true, "unique": true },
+        "description": { "type": "text", "required": false }
+      },
+      "indexes": {
+
+      }
+    },
+
+    "UserTag": {
+      "tableName": "user_tags",
+      "fields": {
+        "id": { "type": "integer", "required": true, "primaryKey": true },
+        "metadata": { "type": "jsonb", "required": false },
+        "create_at": { "type": "datetime", "required": true, "defaultValue": "now" },
+        "updated_at": { "type": "datetime", "required": false, "defaultValue": "now" },
+        "deleted_at": { "type": "datetime", "required": false, "defaultValue": null },
+
+        "user_id": { "type": "integer", "required": true },
+        "tag_id": { "type": "integer", "required": true }
+      },
+      "relationships": {
+        "User": { "type": "belongsTo", "model": "User", "alias": "user", "foreignKey": "user_id", "sourceKey": "id" },
+        "Tag": { "type": "belongsTo", "model": "Tag", "alias": "tag", "foreignKey": "tag_id", "sourceKey": "id" }
+      },
+      "indexes": {
+
+      }
+    }
+
+  },
+  "relationships": {
+    "User": {
+      "hasOne": {
+        "S3Object": { "alias": "icon", "foreignKey": "id", "sourceKey": "icon_s3object_id" }
+      },
+      "hasMany": {
+        "UserAuthProvider": { "alias": "authProviders", "foreignKey": "user_id", "sourceKey": "id" }
+      }
+    },
+
+    "UserAuthProvider": {
+      "belongsTo": {
+        "User": { "alias": "user", "foreignKey": "user_id", "targetKey": "id" }
+      }
+    },
+
+    "UserTag": {
+      "belongsTo": {
+        "User": { "alias": "user", "foreignKey": "user_id", "targetKey": "id" },
+        "Tag": { "alias": "tag", "foreignKey": "tag_id", "targetKey": "id" }
+      }
+    }
+  }
+
+}

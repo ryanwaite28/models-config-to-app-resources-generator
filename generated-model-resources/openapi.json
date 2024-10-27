@@ -1,0 +1,2411 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Denaly | API",
+    "description": "Swagger UI for Denaly API",
+    "termsOfService": "https://example.com/terms/",
+    "contact": {
+      "name": "API Support",
+      "url": "https://www.example.com/support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000/web",
+      "description": "Local server"
+    },
+    {
+      "url": "https://development.gigantic-server.com",
+      "description": "Development server"
+    },
+    {
+      "url": "https://staging.gigantic-server.com",
+      "description": "Staging server"
+    },
+    {
+      "url": "https://api.gigantic-server.com",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/s3-objects": {
+      "get": {
+        "tags": [
+          "S3Object"
+        ],
+        "summary": "Get all S3Objects",
+        "description": "Get all S3Objects",
+        "operationId": "getS3Objects",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of S3Objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/S3ObjectEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "S3Object"
+        ],
+        "summary": "Create a new S3Object",
+        "description": "Create a new S3Object",
+        "operationId": "createS3Object",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateS3ObjectDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "model_type": "",
+                "model_id": 1,
+                "mimetype": "",
+                "is_private": true,
+                "region": "",
+                "bucket": "",
+                "key": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created S3Object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/S3ObjectEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s3-objects/search": {
+      "get": {
+        "tags": [
+          "S3Object"
+        ],
+        "summary": "Get S3Objects by search",
+        "description": "Get s3objects by search",
+        "operationId": "searchS3Objects",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of S3Objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/S3ObjectEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s3-objects/{id}": {
+      "get": {
+        "tags": [
+          "S3Object"
+        ],
+        "summary": "Get S3Object by ID",
+        "description": "Get S3Object by ID",
+        "operationId": "getS3ObjectById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "S3Object found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/S3ObjectEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "S3object not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "S3Object"
+        ],
+        "summary": "Update S3Object by ID",
+        "description": "Update S3Object by ID",
+        "operationId": "updateS3Object",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateS3ObjectDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "model_type": "",
+                "model_id": 1,
+                "mimetype": "",
+                "is_private": true,
+                "region": "",
+                "bucket": "",
+                "key": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "S3Object updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/S3ObjectEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "S3Object not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "S3Object"
+        ],
+        "summary": "Patch S3Object by ID",
+        "description": "Patch S3Object by ID",
+        "operationId": "PatchS3Object",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateS3ObjectDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "model_type": "",
+                "model_id": 1,
+                "mimetype": "",
+                "is_private": true,
+                "region": "",
+                "bucket": "",
+                "key": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "S3Object updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/S3ObjectEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "S3Object not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "S3Object"
+        ],
+        "summary": "Delete S3Object by ID",
+        "description": "Delete S3Object by ID",
+        "operationId": "deleteS3Object",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "S3Object deleted"
+          },
+          "404": {
+            "description": "S3Object not found"
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get all Users",
+        "description": "Get all Users",
+        "operationId": "getUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of Users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Create a new User",
+        "description": "Create a new User",
+        "operationId": "createUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "stripe_customer_account_id": "",
+                "stripe_account_id": "",
+                "stripe_account_verified": true,
+                "stripe_identity_verified": true,
+                "first_name": "",
+                "last_name": "",
+                "bio": "",
+                "icon_s3object_id": 1,
+                "town": "",
+                "city": "",
+                "state": "",
+                "zipcode": 1,
+                "country": "",
+                "tags": "",
+                "specialties": "",
+                "person_verified": true,
+                "email_verified": true,
+                "phone_verified": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created User",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/search": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get Users by search",
+        "description": "Get users by search",
+        "operationId": "searchUsers",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of Users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Get User by ID",
+        "description": "Get User by ID",
+        "operationId": "getUserById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Update User by ID",
+        "description": "Update User by ID",
+        "operationId": "updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "stripe_customer_account_id": "",
+                "stripe_account_id": "",
+                "stripe_account_verified": true,
+                "stripe_identity_verified": true,
+                "first_name": "",
+                "last_name": "",
+                "bio": "",
+                "icon_s3object_id": 1,
+                "town": "",
+                "city": "",
+                "state": "",
+                "zipcode": 1,
+                "country": "",
+                "tags": "",
+                "specialties": "",
+                "person_verified": true,
+                "email_verified": true,
+                "phone_verified": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Patch User by ID",
+        "description": "Patch User by ID",
+        "operationId": "PatchUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "stripe_customer_account_id": "",
+                "stripe_account_id": "",
+                "stripe_account_verified": true,
+                "stripe_identity_verified": true,
+                "first_name": "",
+                "last_name": "",
+                "bio": "",
+                "icon_s3object_id": 1,
+                "town": "",
+                "city": "",
+                "state": "",
+                "zipcode": 1,
+                "country": "",
+                "tags": "",
+                "specialties": "",
+                "person_verified": true,
+                "email_verified": true,
+                "phone_verified": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "User"
+        ],
+        "summary": "Delete User by ID",
+        "description": "Delete User by ID",
+        "operationId": "deleteUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deleted"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/user-auth-providers": {
+      "get": {
+        "tags": [
+          "UserAuthProvider"
+        ],
+        "summary": "Get all UserAuthProviders",
+        "description": "Get all UserAuthProviders",
+        "operationId": "getUserAuthProviders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of UserAuthProviders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserAuthProviderEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "UserAuthProvider"
+        ],
+        "summary": "Create a new UserAuthProvider",
+        "description": "Create a new UserAuthProvider",
+        "operationId": "createUserAuthProvider",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserAuthProviderDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "details": "",
+                "user_id": 1,
+                "provider_name": "",
+                "provider_id": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created UserAuthProvider",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAuthProviderEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user-auth-providers/search": {
+      "get": {
+        "tags": [
+          "UserAuthProvider"
+        ],
+        "summary": "Get UserAuthProviders by search",
+        "description": "Get userauthproviders by search",
+        "operationId": "searchUserAuthProviders",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of UserAuthProviders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserAuthProviderEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user-auth-providers/{id}": {
+      "get": {
+        "tags": [
+          "UserAuthProvider"
+        ],
+        "summary": "Get UserAuthProvider by ID",
+        "description": "Get UserAuthProvider by ID",
+        "operationId": "getUserAuthProviderById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "UserAuthProvider found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAuthProviderEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Userauthprovider not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "UserAuthProvider"
+        ],
+        "summary": "Update UserAuthProvider by ID",
+        "description": "Update UserAuthProvider by ID",
+        "operationId": "updateUserAuthProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserAuthProviderDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "details": "",
+                "user_id": 1,
+                "provider_name": "",
+                "provider_id": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "UserAuthProvider updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAuthProviderEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "UserAuthProvider not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "UserAuthProvider"
+        ],
+        "summary": "Patch UserAuthProvider by ID",
+        "description": "Patch UserAuthProvider by ID",
+        "operationId": "PatchUserAuthProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserAuthProviderDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "details": "",
+                "user_id": 1,
+                "provider_name": "",
+                "provider_id": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "UserAuthProvider updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserAuthProviderEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "UserAuthProvider not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "UserAuthProvider"
+        ],
+        "summary": "Delete UserAuthProvider by ID",
+        "description": "Delete UserAuthProvider by ID",
+        "operationId": "deleteUserAuthProvider",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "UserAuthProvider deleted"
+          },
+          "404": {
+            "description": "UserAuthProvider not found"
+          }
+        }
+      }
+    },
+    "/tags": {
+      "get": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Get all Tags",
+        "description": "Get all Tags",
+        "operationId": "getTags",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of Tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TagEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Create a new Tag",
+        "description": "Create a new Tag",
+        "operationId": "createTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTagDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "name": "",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created Tag",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tags/search": {
+      "get": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Get Tags by search",
+        "description": "Get tags by search",
+        "operationId": "searchTags",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of Tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TagEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tags/{id}": {
+      "get": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Get Tag by ID",
+        "description": "Get Tag by ID",
+        "operationId": "getTagById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tag not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Update Tag by ID",
+        "description": "Update Tag by ID",
+        "operationId": "updateTag",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "name": "",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tag updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tag not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Patch Tag by ID",
+        "description": "Patch Tag by ID",
+        "operationId": "PatchTag",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "name": "",
+                "description": ""
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tag updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Tag not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Tag"
+        ],
+        "summary": "Delete Tag by ID",
+        "description": "Delete Tag by ID",
+        "operationId": "deleteTag",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tag deleted"
+          },
+          "404": {
+            "description": "Tag not found"
+          }
+        }
+      }
+    },
+    "/user-tags": {
+      "get": {
+        "tags": [
+          "UserTag"
+        ],
+        "summary": "Get all UserTags",
+        "description": "Get all UserTags",
+        "operationId": "getUserTags",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of UserTags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserTagEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "UserTag"
+        ],
+        "summary": "Create a new UserTag",
+        "description": "Create a new UserTag",
+        "operationId": "createUserTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserTagDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "user_id": 1,
+                "tag_id": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created UserTag",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserTagEntity"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user-tags/search": {
+      "get": {
+        "tags": [
+          "UserTag"
+        ],
+        "summary": "Get UserTags by search",
+        "description": "Get usertags by search",
+        "operationId": "searchUserTags",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of UserTags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserTagEntity"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user-tags/{id}": {
+      "get": {
+        "tags": [
+          "UserTag"
+        ],
+        "summary": "Get UserTag by ID",
+        "description": "Get UserTag by ID",
+        "operationId": "getUserTagById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "UserTag found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserTagEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usertag not found"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "UserTag"
+        ],
+        "summary": "Update UserTag by ID",
+        "description": "Update UserTag by ID",
+        "operationId": "updateUserTag",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserTagDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "user_id": 1,
+                "tag_id": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "UserTag updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserTagEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "UserTag not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "UserTag"
+        ],
+        "summary": "Patch UserTag by ID",
+        "description": "Patch UserTag by ID",
+        "operationId": "PatchUserTag",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserTagDto"
+              },
+              "example": {
+                "id": 1,
+                "metadata": "",
+                "create_at": "",
+                "updated_at": "",
+                "deleted_at": "",
+                "user_id": 1,
+                "tag_id": 1
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "UserTag updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserTagEntity"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "UserTag not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "UserTag"
+        ],
+        "summary": "Delete UserTag by ID",
+        "description": "Delete UserTag by ID",
+        "operationId": "deleteUserTag",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID of {model_name}",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "UserTag deleted"
+          },
+          "404": {
+            "description": "UserTag not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "S3ObjectEntity": {
+        "type": "object",
+        "description": "S3Object entity",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "model_type": {
+            "type": "string",
+            "format": "string",
+            "description": "Model type"
+          },
+          "model_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Model id"
+          },
+          "mimetype": {
+            "type": "string",
+            "format": "string",
+            "description": "Mimetype"
+          },
+          "is_private": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Is private"
+          },
+          "region": {
+            "type": "string",
+            "format": "string",
+            "description": "Region"
+          },
+          "bucket": {
+            "type": "string",
+            "format": "string",
+            "description": "Bucket"
+          },
+          "key": {
+            "type": "string",
+            "format": "string",
+            "description": "Key"
+          }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "is_private",
+          "region",
+          "bucket",
+          "key"
+        ]
+      },
+      "CreateS3ObjectDto": {
+        "type": "object",
+        "description": "Create S3Object DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "model_type": {
+            "type": "string",
+            "format": "string",
+            "description": "Model type"
+          },
+          "model_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Model id"
+          },
+          "mimetype": {
+            "type": "string",
+            "format": "string",
+            "description": "Mimetype"
+          },
+          "is_private": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Is private"
+          },
+          "region": {
+            "type": "string",
+            "format": "string",
+            "description": "Region"
+          },
+          "bucket": {
+            "type": "string",
+            "format": "string",
+            "description": "Bucket"
+          },
+          "key": {
+            "type": "string",
+            "format": "string",
+            "description": "Key"
+          }
+        }
+      },
+      "UpdateS3ObjectDto": {
+        "type": "object",
+        "description": "Update S3Object DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "model_type": {
+            "type": "string",
+            "format": "string",
+            "description": "Model type"
+          },
+          "model_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Model id"
+          },
+          "mimetype": {
+            "type": "string",
+            "format": "string",
+            "description": "Mimetype"
+          },
+          "is_private": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Is private"
+          },
+          "region": {
+            "type": "string",
+            "format": "string",
+            "description": "Region"
+          },
+          "bucket": {
+            "type": "string",
+            "format": "string",
+            "description": "Bucket"
+          },
+          "key": {
+            "type": "string",
+            "format": "string",
+            "description": "Key"
+          }
+        }
+      },
+      "UserEntity": {
+        "type": "object",
+        "description": "User entity",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "stripe_customer_account_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Stripe customer account id"
+          },
+          "stripe_account_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Stripe account id"
+          },
+          "stripe_account_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Stripe account verified"
+          },
+          "stripe_identity_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Stripe identity verified"
+          },
+          "first_name": {
+            "type": "string",
+            "format": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "format": "string",
+            "description": "Last name"
+          },
+          "bio": {
+            "type": "string",
+            "format": "string",
+            "description": "Bio"
+          },
+          "icon_s3object_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Icon s3object id"
+          },
+          "town": {
+            "type": "string",
+            "format": "string",
+            "description": "Town"
+          },
+          "city": {
+            "type": "string",
+            "format": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "format": "string",
+            "description": "State"
+          },
+          "zipcode": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Zipcode"
+          },
+          "country": {
+            "type": "string",
+            "format": "string",
+            "description": "Country"
+          },
+          "tags": {
+            "type": "string",
+            "format": "string",
+            "description": "Tags"
+          },
+          "specialties": {
+            "type": "string",
+            "format": "string",
+            "description": "Specialties"
+          },
+          "person_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Person verified"
+          },
+          "email_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Email verified"
+          },
+          "phone_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Phone verified"
+          }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "stripe_account_verified",
+          "stripe_identity_verified",
+          "person_verified",
+          "email_verified",
+          "phone_verified"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "description": "Create User DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "stripe_customer_account_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Stripe customer account id"
+          },
+          "stripe_account_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Stripe account id"
+          },
+          "stripe_account_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Stripe account verified"
+          },
+          "stripe_identity_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Stripe identity verified"
+          },
+          "first_name": {
+            "type": "string",
+            "format": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "format": "string",
+            "description": "Last name"
+          },
+          "bio": {
+            "type": "string",
+            "format": "string",
+            "description": "Bio"
+          },
+          "icon_s3object_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Icon s3object id"
+          },
+          "town": {
+            "type": "string",
+            "format": "string",
+            "description": "Town"
+          },
+          "city": {
+            "type": "string",
+            "format": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "format": "string",
+            "description": "State"
+          },
+          "zipcode": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Zipcode"
+          },
+          "country": {
+            "type": "string",
+            "format": "string",
+            "description": "Country"
+          },
+          "tags": {
+            "type": "string",
+            "format": "string",
+            "description": "Tags"
+          },
+          "specialties": {
+            "type": "string",
+            "format": "string",
+            "description": "Specialties"
+          },
+          "person_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Person verified"
+          },
+          "email_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Email verified"
+          },
+          "phone_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Phone verified"
+          }
+        }
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "description": "Update User DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "stripe_customer_account_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Stripe customer account id"
+          },
+          "stripe_account_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Stripe account id"
+          },
+          "stripe_account_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Stripe account verified"
+          },
+          "stripe_identity_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Stripe identity verified"
+          },
+          "first_name": {
+            "type": "string",
+            "format": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "format": "string",
+            "description": "Last name"
+          },
+          "bio": {
+            "type": "string",
+            "format": "string",
+            "description": "Bio"
+          },
+          "icon_s3object_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Icon s3object id"
+          },
+          "town": {
+            "type": "string",
+            "format": "string",
+            "description": "Town"
+          },
+          "city": {
+            "type": "string",
+            "format": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "format": "string",
+            "description": "State"
+          },
+          "zipcode": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Zipcode"
+          },
+          "country": {
+            "type": "string",
+            "format": "string",
+            "description": "Country"
+          },
+          "tags": {
+            "type": "string",
+            "format": "string",
+            "description": "Tags"
+          },
+          "specialties": {
+            "type": "string",
+            "format": "string",
+            "description": "Specialties"
+          },
+          "person_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Person verified"
+          },
+          "email_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Email verified"
+          },
+          "phone_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Phone verified"
+          }
+        }
+      },
+      "UserAuthProviderEntity": {
+        "type": "object",
+        "description": "UserAuthProvider entity",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "details": {
+            "type": "string",
+            "format": "string",
+            "description": "Details"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User id"
+          },
+          "provider_name": {
+            "type": "string",
+            "format": "string",
+            "description": "Provider name"
+          },
+          "provider_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Provider id"
+          }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "user_id",
+          "provider_name",
+          "provider_id"
+        ]
+      },
+      "CreateUserAuthProviderDto": {
+        "type": "object",
+        "description": "Create UserAuthProvider DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "details": {
+            "type": "string",
+            "format": "string",
+            "description": "Details"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User id"
+          },
+          "provider_name": {
+            "type": "string",
+            "format": "string",
+            "description": "Provider name"
+          },
+          "provider_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Provider id"
+          }
+        }
+      },
+      "UpdateUserAuthProviderDto": {
+        "type": "object",
+        "description": "Update UserAuthProvider DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "details": {
+            "type": "string",
+            "format": "string",
+            "description": "Details"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User id"
+          },
+          "provider_name": {
+            "type": "string",
+            "format": "string",
+            "description": "Provider name"
+          },
+          "provider_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Provider id"
+          }
+        }
+      },
+      "TagEntity": {
+        "type": "object",
+        "description": "Tag entity",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "name": {
+            "type": "string",
+            "format": "string",
+            "description": "Name"
+          },
+          "description": {
+            "type": "string",
+            "format": "string",
+            "description": "Description"
+          }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "name"
+        ]
+      },
+      "CreateTagDto": {
+        "type": "object",
+        "description": "Create Tag DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "name": {
+            "type": "string",
+            "format": "string",
+            "description": "Name"
+          },
+          "description": {
+            "type": "string",
+            "format": "string",
+            "description": "Description"
+          }
+        }
+      },
+      "UpdateTagDto": {
+        "type": "object",
+        "description": "Update Tag DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "name": {
+            "type": "string",
+            "format": "string",
+            "description": "Name"
+          },
+          "description": {
+            "type": "string",
+            "format": "string",
+            "description": "Description"
+          }
+        }
+      },
+      "UserTagEntity": {
+        "type": "object",
+        "description": "UserTag entity",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User id"
+          },
+          "tag_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Tag id"
+          }
+        },
+        "required": [
+          "id",
+          "create_at",
+          "user_id",
+          "tag_id"
+        ]
+      },
+      "CreateUserTagDto": {
+        "type": "object",
+        "description": "Create UserTag DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User id"
+          },
+          "tag_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Tag id"
+          }
+        }
+      },
+      "UpdateUserTagDto": {
+        "type": "object",
+        "description": "Update UserTag DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User id"
+          },
+          "tag_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Tag id"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,142 @@
+{
+  "title": "",
+  "description": "",
+  "type": "object",
+  "properties": {
+    "models": {
+      "type": "object",
+      "patternProperties": {
+        "^([A-Z][a-zA-Z0-9]+)$": {
+          "type": "object",
+          "properties": {
+            "tableName": {
+              "type": "string"
+            },
+            "fields": {
+              "type": "object",
+              "patternProperties": {
+                "^([a-z_]+)$": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "string",
+                        "text",
+                        "integer",
+                        "float",
+                        "boolean",
+                        "date",
+                        "datetime",
+                        "time",
+                        "json",
+                        "jsonb"
+                      ]
+                    },
+                    "required": {
+                      "type": "boolean"
+                    },
+                    "primaryKey": {
+                      "type": "boolean"
+                    },
+                    "minLength": {
+                      "type": "integer"
+                    },
+                    "maxLength": {
+                      "type": "integer"
+                    },
+                    "defaultValue": {
+                      "type": [ "number", "string", "boolean", "null" ]
+                    },
+                    "unique": {
+                      "type": "boolean"
+                    },
+                    "references": {
+                      "type": "object",
+                      "properties": {
+                        "model": {
+                          "type": "string"
+                        },
+                        "key": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "model",
+                        "key"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "required"
+                  ]
+                }
+              }
+            },
+            "relationships": {
+              "type": "object",
+              "patternProperties": {
+                "^([A-Z][a-zA-Z0-9]+)$": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "model": {
+                      "type": "string"
+                    },
+                    "alias": {
+                      "type": "string"
+                    },
+                    "foreignKey": {
+                      "type": "string"
+                    },
+                    "sourceKey": {
+                      "type": "string"
+                    },
+                    "targetKey": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "model",
+                    "foreignKey"
+                  ]
+                }
+              }
+            },
+            "indexes": {
+              "type": "object",
+              "patternProperties": {
+                "^([a-z_]+)$": {
+                  "type": "object",
+                  "properties": {
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "unique": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "fields",
+                    "unique"
+                  ]
+                }
+              }
+            }
+          },
+          "required": [
+            "tableName",
+            "fields"
+          ]
+        }
+      }
+    }
+  }
+}
