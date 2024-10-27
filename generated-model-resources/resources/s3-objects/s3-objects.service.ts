@@ -7,9 +7,9 @@ import {
   S3ObjectEntity,
   MapType,
 } from "@app/shared";
-import { CreateS3ObjectDto } from "./s3-objects.create.dto";
-import { UpdateS3ObjectDto } from "./s3-objects.update.dto";
-import { SearchS3ObjectDto } from "./s3-objects.search.dto";
+import { CreateS3ObjectDto } from "./dto/s3-objects.create.dto";
+import { UpdateS3ObjectDto } from "./dto/s3-objects.update.dto";
+import { SearchS3ObjectDto } from "./dto/s3-objects.search.dto";
 import { UploadedFile } from "express-fileupload";
 import { AwsS3Service, AwsS3UploadResults } from "../../services/s3.aws.service";
 import { ModelTypes } from "../../lib/constants/model-types.enum";

@@ -18,9 +18,9 @@ import {
   S3ObjectExists,
   AuthUserOwnsS3Object
 } from './s3-objects.guard';
-import { CreateS3ObjectDto } from "./s3-objects.create.dto";
-import { UpdateS3ObjectDto } from "./s3-objects.update.dto";
-import { SearchS3ObjectDto } from "./s3-objects.search.dto";
+import { CreateS3ObjectDto } from "./dto/s3-objects.create.dto";
+import { UpdateS3ObjectDto } from "./dto/s3-objects.update.dto";
+import { SearchS3ObjectDto } from "./dto/s3-objects.search.dto";
 import { JwtAuthorized } from '../../middlewares/jwt.middleware';
 import { JwtUser } from '../../decorators/jwt.decorator';
 import { MapType, JwtUserData } from '@app/shared';

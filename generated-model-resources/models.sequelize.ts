@@ -41,7 +41,7 @@ export const User = sequelize.define("users", {
 });
   
 
-export const UserAuthProvider = sequelize.define("users", {
+export const UserAuthProvider = sequelize.define("user_auth_providers", {
   id: { type: DataTypes.INTEGER, allowNull: true, primaryKey: true, autoIncrement: true },
   metadata: { type: DataTypes.JSONB, allowNull: false },
   create_at: { type: DataTypes.DATETIME, allowNull: true },

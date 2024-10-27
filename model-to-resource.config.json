@@ -59,7 +59,7 @@
     },
 
     "UserAuthProvider": {
-      "tableName": "users",
+      "tableName": "user_auth_providers",
       "fields": {
         "id": { "type": "integer", "required": true, "primaryKey": true },
         "metadata": { "type": "jsonb", "required": false },

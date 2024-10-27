@@ -7,9 +7,9 @@ import {
   UserEntity,
   MapType,
 } from "@app/shared";
-import { CreateUserDto } from "./users.create.dto";
-import { UpdateUserDto } from "./users.update.dto";
-import { SearchUserDto } from "./users.search.dto";
+import { CreateUserDto } from "./dto/users.create.dto";
+import { UpdateUserDto } from "./dto/users.update.dto";
+import { SearchUserDto } from "./dto/users.search.dto";
 import { UploadedFile } from "express-fileupload";
 import { AwsS3Service, AwsS3UploadResults } from "../../services/s3.aws.service";
 import { ModelTypes } from "../../lib/constants/model-types.enum";

@@ -18,9 +18,9 @@ import {
   UserAuthProviderExists,
   AuthUserOwnsUserAuthProvider
 } from './user-auth-providers.guard';
-import { CreateUserAuthProviderDto } from "./user-auth-providers.create.dto";
-import { UpdateUserAuthProviderDto } from "./user-auth-providers.update.dto";
-import { SearchUserAuthProviderDto } from "./user-auth-providers.search.dto";
+import { CreateUserAuthProviderDto } from "./dto/user-auth-providers.create.dto";
+import { UpdateUserAuthProviderDto } from "./dto/user-auth-providers.update.dto";
+import { SearchUserAuthProviderDto } from "./dto/user-auth-providers.search.dto";
 import { JwtAuthorized } from '../../middlewares/jwt.middleware';
 import { JwtUser } from '../../decorators/jwt.decorator';
 import { MapType, JwtUserData } from '@app/shared';

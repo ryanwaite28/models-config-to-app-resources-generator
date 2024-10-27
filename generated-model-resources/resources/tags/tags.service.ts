@@ -7,9 +7,9 @@ import {
   TagEntity,
   MapType,
 } from "@app/shared";
-import { CreateTagDto } from "./tags.create.dto";
-import { UpdateTagDto } from "./tags.update.dto";
-import { SearchTagDto } from "./tags.search.dto";
+import { CreateTagDto } from "./dto/tags.create.dto";
+import { UpdateTagDto } from "./dto/tags.update.dto";
+import { SearchTagDto } from "./dto/tags.search.dto";
 import { UploadedFile } from "express-fileupload";
 import { AwsS3Service, AwsS3UploadResults } from "../../services/s3.aws.service";
 import { ModelTypes } from "../../lib/constants/model-types.enum";

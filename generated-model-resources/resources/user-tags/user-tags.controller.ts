@@ -18,9 +18,9 @@ import {
   UserTagExists,
   AuthUserOwnsUserTag
 } from './user-tags.guard';
-import { CreateUserTagDto } from "./user-tags.create.dto";
-import { UpdateUserTagDto } from "./user-tags.update.dto";
-import { SearchUserTagDto } from "./user-tags.search.dto";
+import { CreateUserTagDto } from "./dto/user-tags.create.dto";
+import { UpdateUserTagDto } from "./dto/user-tags.update.dto";
+import { SearchUserTagDto } from "./dto/user-tags.search.dto";
 import { JwtAuthorized } from '../../middlewares/jwt.middleware';
 import { JwtUser } from '../../decorators/jwt.decorator';
 import { MapType, JwtUserData } from '@app/shared';

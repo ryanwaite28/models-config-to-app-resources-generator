@@ -7,9 +7,9 @@ import {
   UserAuthProviderEntity,
   MapType,
 } from "@app/shared";
-import { CreateUserAuthProviderDto } from "./user-auth-providers.create.dto";
-import { UpdateUserAuthProviderDto } from "./user-auth-providers.update.dto";
-import { SearchUserAuthProviderDto } from "./user-auth-providers.search.dto";
+import { CreateUserAuthProviderDto } from "./dto/user-auth-providers.create.dto";
+import { UpdateUserAuthProviderDto } from "./dto/user-auth-providers.update.dto";
+import { SearchUserAuthProviderDto } from "./dto/user-auth-providers.search.dto";
 import { UploadedFile } from "express-fileupload";
 import { AwsS3Service, AwsS3UploadResults } from "../../services/s3.aws.service";
 import { ModelTypes } from "../../lib/constants/model-types.enum";

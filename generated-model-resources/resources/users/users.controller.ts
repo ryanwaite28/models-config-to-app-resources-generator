@@ -18,9 +18,9 @@ import {
   UserExists,
   AuthUserOwnsUser
 } from './users.guard';
-import { CreateUserDto } from "./users.create.dto";
-import { UpdateUserDto } from "./users.update.dto";
-import { SearchUserDto } from "./users.search.dto";
+import { CreateUserDto } from "./dto/users.create.dto";
+import { UpdateUserDto } from "./dto/users.update.dto";
+import { SearchUserDto } from "./dto/users.search.dto";
 import { JwtAuthorized } from '../../middlewares/jwt.middleware';
 import { JwtUser } from '../../decorators/jwt.decorator';
 import { MapType, JwtUserData } from '@app/shared';
