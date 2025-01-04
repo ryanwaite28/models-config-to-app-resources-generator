@@ -20,25 +20,32 @@ export class UpdateTagDto implements Partial<TagEntity> {
   
   @IsDefined()
   @IsInt()
-id: number;
+  id: number;
+
   @IsOptional()
   @IsString()
-metadata?: string | null;
+  metadata?: string | null;
+
   @IsDefined()
   @IsString()
-create_at: string;
+  create_at: string;
+
   @IsOptional()
   @IsString()
-updated_at?: string | null;
+  updated_at?: string | null;
+
   @IsOptional()
   @IsString()
-deleted_at?: string | null;
+  deleted_at?: string | null;
+
   @IsDefined()
   @IsString()
-name: string;
+  name: string;
+
   @IsOptional()
   @IsString()
-description?: string | null;
+  description?: string | null;
+
 }
 
         

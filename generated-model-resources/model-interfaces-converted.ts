@@ -1,5 +1,4 @@
-import { _BaseEntity } from './base-model.interface';
-
+export interface _BaseEntity {}
 
 
 

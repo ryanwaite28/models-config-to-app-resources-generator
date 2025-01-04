@@ -70,7 +70,8 @@ def format_dto_fields(f: str) -> str:
   decorated = (
     '  ' + ('@IsOptional()' if ('| null' in f) else '@IsDefined()') + '\n' + 
     '  ' + ('@IsString()' if (': string' in f) else '@IsBoolean()' if (': boolean' in f) else '@IsInt()' if (': number' in f) else '') + '\n' +
-    (f.replace(':', '?:') if ('| null' in f) else f)
+    '  ' + (f.replace(':', '?:') if ('| null' in f) else f) +
+    '\n'
   )
     
   # print ('decorated:')
@@ -84,7 +85,7 @@ def format_dto_fields_for_query(f: str) -> str:
   def format_number_field(f: str) -> str:
     return (
       '  ' + '@IsString()\n  @Matches(INTEGER_WITH_COMPARATOR_REGEX)\n' +
-      (f if ('| null' in f) else f.replace(';', ' | null;')).replace(':', '_op:').replace('number', 'string')
+      '  ' + (f if ('| null' in f) else f.replace(';', ' | null;')).replace(':', '_op:').replace('number', 'string')
     )
 
 
@@ -92,7 +93,8 @@ def format_dto_fields_for_query(f: str) -> str:
     '  @IsOptional()\n' + 
     ('  @IsString()\n  @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)' if (': string' in f) else '  @IsBoolean()' if (': boolean' in f) else format_number_field(f) if (': number' in f) else '') + '\n' +
     # + (f.split(':')[0] + ': string | null;')
-    ('' if (': number' in f) else (f if ('| null' in f) else f.replace(';', ' | null;')))
+    '  ' + ('' if (': number' in f) else (f if ('| null' in f) else f.replace(';', ' | null;')))
+    + '\n'
   )
     
   # print ('decorated:')
@@ -177,6 +179,11 @@ def create_openapi_specs_from_model(model_name: str):
       "type": "object",
       "description": f"Update {model_name} DTO",
       "properties": model_properties
+    },
+    f"Search{model_name}Dto": {
+      "type": "object",
+      "description": f"Search {model_name} DTO",
+      "properties": model_properties
     }
   }
 
@@ -249,7 +256,7 @@ def create_openapi_specs_from_model(model_name: str):
                   "schema": {
                     "type": "array",
                     "items": {
-                      "$ref": f"#/components/schemas/{model_name}Entity"
+                      "$ref": f"#/components/schemas/Search{model_name}Dto"
                     }
                   }
                 }
@@ -491,6 +498,7 @@ import {{
   Patch,
   UseBefore,
 }} from 'routing-controllers';
+import {{ OpenAPI }} from 'routing-controllers-openapi'
 import {{ {model_name}Service }} from './{kebob_name_plural}.service';
 import {{
   {model_name}Exists,
@@ -501,6 +509,7 @@ import {{ Update{model_name}Dto }} from "./dto/{kebob_name_plural}.update.dto";
 import {{ Search{model_name}Dto }} from "./dto/{kebob_name_plural}.search.dto";
 import {{ JwtAuthorized }} from '../../middlewares/jwt.middleware';
 import {{ JwtUser }} from '../../decorators/jwt.decorator';
+import {{ {model_name} }} from '@app/shared';
 import {{ MapType, JwtUserData }} from '@app/shared';
 import {{ FileUpload, FileUploadByName }} from '../../decorators/file-upload.decorator';
 import {{ UploadedFile }} from 'express-fileupload';
@@ -516,19 +525,68 @@ export class {model_name}Controller {{
   
   constructor(private {model_var_name}Service: {model_name}Service) {{}}
 
+  
 
   @Get('/search')
+  @OpenAPI({{
+    description: 'Search {model_name_plural}',
+    responses: {{
+      '200': {{
+        description: 'Search Successful',
+        content: {{
+          'application/json': {{
+            schema: {{
+              type: 'array',
+              items: {{
+                '$ref': '#/components/schemas/{model_name}'
+              }}
+            }}
+          }}
+        }}
+      }}
+    }},
+  }})
   get{model_name}BySearch(@QueryParams() query: Search{model_name}Dto) {{
     return this.{model_var_name}Service.get{model_name}BySearch(query);
   }}
 
   @Get('/:id')
+  @OpenAPI({{
+    description: 'Get {model_name} by id',
+    responses: {{
+      '200': {{
+        description: 'Get Successful',
+        content: {{
+          'application/json': {{
+            schema: {{
+              '$ref': '#/components/schemas/{model_name}'
+            }}
+          }}
+        }}
+      }}
+    }},
+  }})
   get{model_name}ById(@Param('id') id: number) {{
     return this.{model_var_name}Service.get{model_name}ById(id);
   }}
 
   @Post('')
   @UseBefore(JwtAuthorized)
+  @OpenAPI({{
+    description: 'Create {model_name}',
+    responses: {{
+      '201': {{
+        description: 'Post Successful',
+        content: {{
+          'application/json': {{
+            schema: {{
+              '$ref': '#/components/schemas/{model_name}'
+            }}
+          }}
+        }}
+      }}
+    }},
+  }})
   create{model_name}(
     @JwtUser() user: JwtUserData,
     @BodyParam('payload', {{ validate: true }}) dto: Create{model_name}Dto,
@@ -539,6 +597,21 @@ export class {model_name}Controller {{
 
   @Put('/:id')
   @UseBefore(JwtAuthorized)
+  @OpenAPI({{
+    description: 'Overwrite {model_name} by id',
+    responses: {{
+      '200': {{
+        description: 'Put Successful',
+        content: {{
+          'application/json': {{
+            schema: {{
+              '$ref': '#/components/schemas/{model_name}'
+            }}
+          }}
+        }}
+      }}
+    }},
+  }})
   update{model_name}(
     @JwtUser() user: JwtUserData,
     @Param('id') id: number,
@@ -549,6 +622,21 @@ export class {model_name}Controller {{
 
   @Patch('/:id')
   @UseBefore(JwtAuthorized)
+  @OpenAPI({{
+    description: 'Update {model_name} by id',
+    responses: {{
+      '200': {{
+        description: 'Patch Successful',
+        content: {{
+          'application/json': {{
+            schema: {{
+              '$ref': '#/components/schemas/{model_name}'
+            }}
+          }}
+        }}
+      }}
+    }},
+  }})
   patch{model_name}(
     @JwtUser() user: JwtUserData,
     @Param('id') id: number,
@@ -559,6 +647,14 @@ export class {model_name}Controller {{
 
   @Delete('/:id')
   @UseBefore(JwtAuthorized)
+  @OpenAPI({{
+    description: 'Delete {model_name} by id',
+    responses: {{
+      '204': {{
+        description: 'Delete Successful'
+      }}
+    }},
+  }})
   delete{model_name}(
     @JwtUser() user: JwtUserData,
     @Param('id') id: number
@@ -1004,7 +1100,7 @@ export class Search{model_name}Dto implements Partial<{model_name}Entity> {{
 
 
 def getFieldDef(field, field_config):
-  return f'{field}: {'string' if (field_config['type'] in ['string', 'text', 'datetime', 'uuid', 'json', 'jsonb']) else 'number' if (field_config['type'] in ['integer', 'float', 'double', 'number']) else 'boolean'}{' | null' if not (field_config['required']) else ''};'
+  return f'{field}: {'string' if (field_config['dataType'] in ['string', 'text', 'datetime', 'uuid', 'json', 'jsonb']) else 'number' if (field_config['dataType'] in ['integer', 'float', 'double', 'number']) else 'boolean'}{' | null' if not (field_config['required']) else ''};'
 
 
 def convert_models_to_resources():
@@ -1055,7 +1151,7 @@ def convert_models_to_resources():
 
   
   interface_file_contents = [
-    "import { _BaseEntity } from './base-model.interface';\n",
+    "export interface _BaseEntity {}",
     "\n\n\n"
   ]
 
@@ -1098,7 +1194,7 @@ export interface {model_name}Entity extends _BaseEntity {{
     
     model_object_contents = f'''\
 export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'}, {{
-  {'\n  '.join([ f"{field}: {{ type: DataTypes.{fields[field]['type'].upper()}, allowNull: {'false' if (not fields[field]['required']) else 'true'}{', primaryKey: true, autoIncrement: true' if fields[field].get('primaryKey', False) else ''} }}," for field in field_names ])}
+  {'\n  '.join([ f"{field}: {{ type: DataTypes.{fields[field]['dataType'].upper()}, allowNull: {'false' if (fields[field]['required']) else 'true'}{', primaryKey: true, autoIncrement: true' if fields[field].get('primaryKey', False) else ''} }}," for field in field_names ])}
 }});
   '''
 # }}, {{ indexes: [{{ unique: f{'true' if model_config.get('indexes', {}).get('unique', False) else 'false'}, fields: [{ ', '.join([]) }] }}] }});
@@ -1108,20 +1204,24 @@ export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'},
       interface_contents = interface_contents.replace("\n  <relationships>", "")
     else:
       relationship_contents = []
+
       relationshipsHasOne = relationships.get("hasOne", {})
       relationshipsHasMany = relationships.get("hasMany", {})
-      relationshipsBelongsTo = relationships.get("belongsTo", {})
+      relationshipsBelongsTo = relationships.get("belongsToOne", {})
       relationshipsBelongsToMany = relationships.get("belongsToMany", {})
 
       for model in relationshipsHasOne.keys():
         relationship_contents.append(f'{relationshipsHasOne[model]['alias']}?: {model}Entity;')
         model_relationships_file_cotents.append(f'{model_name}.hasOne({model}, {{ as: "{relationshipsHasOne[model]['alias']}", foreignKey: "{relationshipsHasOne[model]['foreignKey']}", sourceKey: "{relationshipsHasOne[model]['sourceKey']}" }});')
+      
       for model in relationshipsHasMany.keys():
         relationship_contents.append(f'{relationshipsHasMany[model]['alias']}?: {model}Entity[];')
         model_relationships_file_cotents.append(f'{model_name}.hasMany({model}, {{ as: "{relationshipsHasMany[model]['alias']}", foreignKey: "{relationshipsHasMany[model]['foreignKey']}", sourceKey: "{relationshipsHasMany[model]['sourceKey']}" }});')
+      
       for model in relationshipsBelongsTo.keys():
         relationship_contents.append(f'{relationshipsBelongsTo[model]['alias']}?: {model}Entity;')
         model_relationships_file_cotents.append(f'{model_name}.belongsTo({model}, {{ as: "{relationshipsBelongsTo[model]['alias']}", foreignKey: "{relationshipsBelongsTo[model]['foreignKey']}", targetKey: "{relationshipsBelongsTo[model]['targetKey']}" }});')
+      
       for model in relationshipsBelongsToMany.keys():
         relationship_contents.append(f'{relationshipsBelongsToMany[model]['alias']}?: {model}Entity[];')
         model_relationships_file_cotents.append(f'{model_name}.belongsToMany({model}, {{ as: "{relationshipsBelongsToMany[model]['alias']}", foreignKey: "{relationshipsBelongsToMany[model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[model]['targetKey']}" }});')
@@ -1201,11 +1301,478 @@ export class RepositoryService {{
         
 ''')
   
+  regex_contents = ('''\
+export const AUTH_BEARER_HEADER_REGEX: RegExp = /Bearer\s[^]/;
+export const GENERIC_TEXT_REGEX: RegExp = /^[a-zA-Z0-9\s\'\-\_\.\@\$\#]{1,250}/;
+export const PERSON_NAME_REGEX: RegExp = /^[a-zA-Z\s\'\-\_\.]{2,50}$/;
+export const URL_REGEX = /[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)?/gi;
+export const BASE64_REGEX = /^data:([A-Za-z-+\/]+);base64,(.+)$/;
+export const MENTIONS_REGEX = /@[a-zA-Z0-9\-\_\.]{2,50}/gi;
+
+export const YOUTUBE_URL_STANDARD = /http(s?):\/\/(www\.)?youtube\.com\/watch\?(.*)/gi;
+export const YOUTUBE_URL_SHORT = /http(s?):\/\/(www\.)?youtu\.be\/(.*)/gi;
+export const YOUTUBE_URL_EMBED = /http(s?):\/\/(www\.)?youtube\.com\/embed\/(.*)/gi;
+export const YOUTUBE_URL_ID = /(v=[a-zA-Z0-9\-\_]{7,}|\/[a-zA-Z0-9\-\_]{7,})/gi;
+
+export const LEADING_SPACES = /[\s]{2,}/;
+export const LEADING_SPACES_GLOBAL = /[\s]{2,}/gi;
+
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// export const PHONE_NUMBER_REGEX = /^\+?[1-9]\d{1,14}$/;
+export const PHONE_NUMBER_REGEX = /^\+1\d{10}$/;
+export const ZIP_CODE_REGEX = /^\d{5}$/;
+export const IP_ADDRESS_REGEX = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+export const MAC_ADDRESS_REGEX = /^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$/;
+export const UUID_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/;
+export const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+export const ISO_TIME_REGEX = /^\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})?$/;
+export const ISO_DATE_TIME_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})?$/;
+export const ISO_OFFSET_REGEX = /^\d{2}:\d{2}$/;
+export const COMMA_SEPARATED_LIST_REGEX = /^(\w+(?:\s*,\s*\w+)*)$/;
+export const COMMA_SEPARATED_LIST_REGEX2 = /(([^,]+),?)/;
+export const SEMICOLON_SEPARATED_LIST_REGEX = /^(\w+(?:\s*;\s*\w+)*)$/;
+
+export const PERCENTAGE_REGEX = /^(\d{1,3}%)$/;
+export const INTEGER_REGEX = /^(\d+)$/;
+export const DECIMAL_REGEX = /^(\d+(?:\.\d*)?)$/;
+export const TIME_REGEX = /^(\d{2}:\d{2}:\d{2})$/;
+export const DATE_REGEX = /^(\d{4}-\d{2}-\d{2})$/;
+export const DATETIME_REGEX = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})$/;
+export const UUID_V4_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-4[0-9A-Fa-f]{3}-[89AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+export const UUID_V5_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-5[0-9A-Fa-f]{3}-[89AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+export const UUID_V6_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[6789AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+export const UUID_V7_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-7[0-9A-Fa-f]{3}-[89AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+export const UUID_V8_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-8[0-9A-Fa-f]{3}-[89AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+export const UUID_V9_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-9[0-9A-Fa-f]{3}-[89AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+export const UUID_V10_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-A[0-9A-Fa-f]{3}-[89AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+export const UUID_V11_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-B[0-9A-Fa-f]{3}-[89AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+export const UUID_V12_REGEX = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-C[0-9A-Fa-f]{3}-[89AB][0-9A-Fa-f]{3}-[0-9A-Fa-f]{12}$/;
+
+export const ALPHANUMERIC_SPACE_DASH_UNDERSCORE_REGEX = /^[a-zA-Z0-9\s\-\_]{1,250}$/;
+export const ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_REGEX = /^[a-zA-Z0-9\s\-\_\.\@]{1,250}$/;
+export const ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_REGEX = /^[a-zA-Z0-9\s\-\_\.\,]{1,250}$/;
+export const ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_REGEX = /^[a-zA-Z0-9\s\-\_\.\,\:]{1,250}$/;
+export const ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX = /^[a-zA-Z0-9\s\-\_\.\,\:\/]{1,250}$/;
+export const ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_BRACKET_REGEX = /^[a-zA-Z0-9\s\-\_\.\,\:\/\[\]]{1,250}$/;
+export const ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_BRACKET_PARENTHESIS_REGEX = /^[a-zA-Z0-9\s\-\_\.\,\:\/\[\]\(\)]{1,250}$/;
+
+export const BOOLEAN_REGEX = /^(true|false)$/;
+
+export const INTEGER_WITH_COMPARATOR_REGEX = /(^(eq|ne|gt|lt|gte|lte)<(\d+)>$|^(between|notBetween)<([\d]+,[\d]+)>$|^(in|notIn)<([\d]+(,[\d]+)*)>$)/;
+// day of the week regex
+export const DAY_OF_WEEK_REGEX = /^(mon|tue|wed|thu|fri|sat|sun)$/;
+// full day of the week regex
+// export const FULL_DAY_OF_WEEK_REGEX = /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/;
+export const DAYS_OF_THE_WEEK_REGEX = /^(?:sunday,?)?(?:monday,?)?(?:tuesday,?)?(?:wednesday,?)?(?:thursday,?)?(?:friday,?)?(?:saturday,?)?$/;
+''')
+  
+  aws_s3_service = ('''\
+import {
+  S3Client,
+  PutObjectCommand,
+  CreateBucketCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  DeleteBucketCommand,
+  HeadBucketCommand,
+  PutObjectCommandOutput
+} from "@aws-sdk/client-s3";
+import { v4 as uuidv4 } from 'uuid';
+import { UploadedFile } from "express-fileupload";
+import { readFileSync } from "fs";
+import { HttpStatusCodes, MapType, ServiceMethodResults } from "@app/shared";
+import { AppEnvironment, HttpRequestException, LOGGER } from "@app/backend";
+import { isImageFileOrBase64, upload_base64, upload_expressfile } from "../lib/utils/request-file.utils";
+import { IUploadFile } from "../lib/interfaces/common.interface";
+import { readFile } from 'fs/promises';
+import { Service } from "typedi";
+
+
+
+// Create an Amazon S3 service client object.
+// const s3Client = AppEnvironment.IS_ENV.LOCAL
+//   ? new S3({
+//     endpoint: 'http://localhost:4566',  // required for localstack
+//     accessKeyId: 'test',
+//     secretAccessKey: 'test',
+//     s3ForcePathStyle: true,  // required for localstack
+//   })
+//   : new S3({ region: AppEnvironment.AWS.S3.REGION });
+
+const s3Client = AppEnvironment.IS_ENV.LOCAL
+  ? new S3Client({
+      region: AppEnvironment.AWS.S3.REGION,
+      forcePathStyle: true,
+      endpoint: AppEnvironment.AWS.S3.ENDPOINT,
+      credentials: {
+        accessKeyId: 'test',
+        secretAccessKey: 'test',
+      }
+    })
+  : new S3Client({ region: AppEnvironment.AWS.S3.REGION })
+
+export type AwsS3UploadResults = {
+  Region: string,
+  Bucket: string,
+  Key: string,
+  ContentType: string,
+  Link: string,
+  S3Url: string,
+  Id: string,
+};
+
+export interface IAwsS3Service {
+  createBucket(Bucket: string): Promise<any>;
+  createObject(params: {
+    Bucket: string,
+    Key: string,
+    Body: any,
+    ContentType: string
+  }): Promise<any>;
+  getObject(params: {
+    Bucket: string,
+    Key: string
+  }): Promise<any>;
+  deleteBucket(Bucket: string): Promise<any>;
+  deleteObject(params: {
+    Bucket: string,
+    Key: string
+  }): Promise<any>;
+  bucketExists(Bucket: string): Promise<boolean>;
+}
+
+// https://www.npmjs.com/package/s3-upload-stream
+
+
+@Service()
+export class AwsS3Service implements IAwsS3Service {
+
+  isS3ConventionId(id: string) {
+    return id.includes(`${AppEnvironment.AWS.S3.BUCKET}|`);
+  }
+
+  async uploadBuffer(
+    buffer: Buffer,
+    params: {
+      filename: string,
+      mimetype: string,
+    }
+  ) {
+    try {
+      if (!buffer || buffer.byteLength === 0) {
+        throw new HttpRequestException(HttpStatusCodes.BAD_REQUEST, {
+          message: `buffer is missing/empty`
+        });
+      }
+  
+      const Key = `public/static/uploads/${params.mimetype.toLowerCase()}/${uuidv4()}.${Date.now()}.${params.filename}`;
+      const Id = `${AppEnvironment.AWS.S3.BUCKET}|${Key}`; // unique id ref for database storage; makes it easy to figure out the bucket and key for later usages/purposes.
+      const Link = `${AppEnvironment.AWS.S3.SERVE_ORIGIN}/${Key}`;
+      const S3Url = `${AppEnvironment.AWS.S3.S3_URL}/${AppEnvironment.AWS.S3.BUCKET}/${Key}`;
+  
+      await this.createObject({
+        Body: buffer,
+        Bucket: AppEnvironment.AWS.S3.BUCKET,
+        Key,
+        ContentType: params.mimetype.toLowerCase()
+      });
+  
+      LOGGER.info(`Web link to new upload: ${Link}`);
+  
+      const results: AwsS3UploadResults = {
+        Region: AppEnvironment.AWS.S3.REGION,
+        Bucket: AppEnvironment.AWS.S3.BUCKET,
+        Key,
+        ContentType: params.mimetype.toLowerCase(),
+        Link,
+        S3Url,
+        Id
+      };
+  
+      LOGGER.info(`AWS S3 upload results:`, { results });
+  
+      return results;
+    }
+    catch (error) {
+      console.error('s3 error', error);
+      throw new HttpRequestException(HttpStatusCodes.INTERNAL_SERVER_ERROR, {
+        message: `Could not upload to AWS S3; something went wrong`,
+        context: error
+      });
+    }
+  }
+
+  async uploadFile(file: UploadedFile) {
+    try {
+      if (!file || file.size === 0) {
+        throw new HttpRequestException(HttpStatusCodes.BAD_REQUEST, {
+          message: `file is missing/empty`
+        });
+      }
+  
+      const buffer: Buffer = await readFile(file.tempFilePath);
+  
+      if (!buffer || buffer.byteLength === 0) {
+        throw new HttpRequestException(HttpStatusCodes.BAD_REQUEST, {
+          message: `file buffer is missing/empty`
+        });
+      }
+  
+      const Key = `public/static/uploads/${file.mimetype.toLowerCase()}/${uuidv4()}.${Date.now()}.${file.name}`;
+      const Id = `${AppEnvironment.AWS.S3.BUCKET}|${Key}`; // unique id ref for database storage; makes it easy to figure out the bucket and key for later usages/purposes.
+      const Link = `${AppEnvironment.AWS.S3.SERVE_ORIGIN}/${Key}`;
+      const S3Url = `${AppEnvironment.AWS.S3.S3_URL}/${AppEnvironment.AWS.S3.BUCKET}/${Key}`;
+  
+      await this.createObject({
+        Body: buffer,
+        Bucket: AppEnvironment.AWS.S3.BUCKET,
+        Key,
+        ContentType: file.mimetype.toLowerCase()
+      });
+  
+      LOGGER.info(`Web link to new upload: ${Link}`);
+  
+      const results: AwsS3UploadResults = {
+        Region: AppEnvironment.AWS.S3.REGION,
+        Bucket: AppEnvironment.AWS.S3.BUCKET,
+        Key,
+        ContentType: file.mimetype.toLowerCase(),
+        Link,
+        S3Url,
+        Id
+      };
+  
+      LOGGER.info(`AWS S3 upload results:`, { results });
+  
+      return results;
+    }
+    catch (error) {
+      console.error('s3 error', error);
+      throw new HttpRequestException(HttpStatusCodes.INTERNAL_SERVER_ERROR, {
+        message: `Could not upload to AWS S3; something went wrong`,
+        context: error
+      });
+    }
+  }
+
+  async uploadFileWithValidation(
+    file: string | UploadedFile,
+    options?: {
+      treatNotFoundAsError: boolean,
+      validateAsImage?: boolean,
+      mutateObj?: MapType,
+      id_prop?: string,
+      link_prop?: string;
+    }
+  ) {
+    if (!file) {
+      const serviceMethodResults: ServiceMethodResults = {
+        status: HttpStatusCodes.BAD_REQUEST,
+        error: options && options.hasOwnProperty('treatNotFoundAsError') ? options?.treatNotFoundAsError : true,
+        info: {
+          message: `No argument found/given`
+        }
+      };
+      
+      const errMsg = `AwsS3Service.uploadFile - ${options?.treatNotFoundAsError ? 'error' : 'info'}: no file input...`;
+      options?.treatNotFoundAsError
+        ? LOGGER.error(errMsg, { options, serviceMethodResults })
+        : LOGGER.info(errMsg, { options, serviceMethodResults });
+      return serviceMethodResults;
+    }
+
+    if (!!options?.validateAsImage && !isImageFileOrBase64(file)) {
+      const serviceMethodResults: ServiceMethodResults = {
+        status: HttpStatusCodes.BAD_REQUEST,
+        error: true,
+        info: {
+          message: `Bad file input given.`
+        }
+      };
+      return serviceMethodResults;
+    }
+
+    try {
+      let filepath: string = '';
+      let filetype: string = '';
+      let filename: string = '';
+      let filedata: IUploadFile = null;
+      
+      if (typeof file === 'string') {
+        // base64 string provided; attempt parsing...
+        filedata = await upload_base64(file);
+        filepath = filedata.file_path;
+        filetype = filedata.filetype;
+        filename = filedata.filename;
+      }
+      else {
+        filedata = await upload_expressfile(file);
+        filetype = (<UploadedFile> file).mimetype;
+        filepath = filedata.file_path;
+        filename = filedata.filename;
+      }
+
+      if (!filetype || !filename || !filepath) {
+        throw new HttpRequestException(HttpStatusCodes.INTERNAL_SERVER_ERROR, {
+          message: `file is missing data`,
+          data: { filename, filepath, filetype, file }
+        });
+      }
+  
+      const Key = `public/static/uploads/${filetype.toLowerCase()}/${filename}`;
+      const Id = `${AppEnvironment.AWS.S3.BUCKET}|${Key}`; // unique id ref for database storage; makes it easy to figure out the bucket and key for later usages/purposes.
+      const Link = `${AppEnvironment.AWS.S3.SERVE_ORIGIN}/${Key}`;
+      const S3Url = `${AppEnvironment.AWS.S3.S3_URL}/${AppEnvironment.AWS.S3.BUCKET}/${Key}`;
+
+      const Body: Buffer = readFileSync(filepath);
+
+      await this.createObject({
+        Bucket: AppEnvironment.AWS.S3.BUCKET,
+        Key,
+        Body,
+        ContentType: filetype.toLowerCase()
+      });
+
+      LOGGER.info(`Web link to new upload: ${Link}`);
+  
+      const results: AwsS3UploadResults = {
+        Region: AppEnvironment.AWS.S3.REGION,
+        Bucket: AppEnvironment.AWS.S3.BUCKET,
+        Key,
+        ContentType: filetype.toLowerCase(),
+        Link,
+        S3Url,
+        Id
+      };
+
+      if (options && options.mutateObj && options.id_prop && options.link_prop) {
+        options.mutateObj[options.id_prop] = Id;
+        options.mutateObj[options.link_prop] = Link;
+      }
+
+      filedata?.remove();
+  
+      LOGGER.info(`AWS S3 upload results:`, { results });
+      const serviceMethodResults: ServiceMethodResults<AwsS3UploadResults> = {
+        status: HttpStatusCodes.OK,
+        error: false,
+        info: {
+          data: results
+        }
+      };
+      LOGGER.info(`AWS S3 upload results:`, { results });
+      return serviceMethodResults;
+    }
+    catch (error) {
+      const serviceMethodResults: ServiceMethodResults = {
+        status: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+        error: true,
+        info: {
+          message: `Could not upload to AWS S3; something went wrong`
+        }
+      };
+      LOGGER.error(serviceMethodResults.info.message || 'Error', { error });
+      return serviceMethodResults;
+    }
+  }
+
+  // create
+
+  async createBucket(Bucket: string) {
+    const data = await s3Client.send(new CreateBucketCommand({ Bucket }));
+    console.log({ data, Bucket });
+    LOGGER.info("Successfully created a bucket called:", { Bucket, data });
+    return data; // For unit tests.
+  }
+
+  async createObject(params: {
+    Bucket: string, // The name of the bucket. For example, 'sample_bucket_101'.
+    Key: string, // The name of the object. For example, 'sample_upload.txt'.
+    Body: any, // The content of the object. For example, 'Hello world!".
+    ContentType: string
+  }) {
+    const results: PutObjectCommandOutput = await s3Client.send(new PutObjectCommand(params));
+    delete params.Body;
+    LOGGER.info(
+      "Successfully created " +
+      params.Key +
+      " and uploaded it to " +
+      params.Bucket +  "/" + params.Key +
+      ", served as ",
+      { results, params }
+    );
+    return results;
+  }
+
+  // get
+
+  async getObject(params: {
+    Bucket: string // The name of the bucket. For example, 'sample_bucket_101'.
+    Key: string, // The name of the object. For example, 'sample_upload.txt'.
+  }) {
+    const results = await s3Client.send(new GetObjectCommand(params));
+    LOGGER.info(
+      "Successfully fetched " +
+      params.Key +
+      " and uploaded it to " +
+      params.Bucket +
+      "/" +
+      params.Key,
+      { results, params }
+    );
+    return results; // For unit tests.
+  }
+
+  // delete
+
+  async deleteBucket(Bucket: string) {
+    const data = await s3Client.send(new DeleteBucketCommand({ Bucket }));
+    LOGGER.info(`Deleted Bucket ${Bucket}`, { data, Bucket });
+    return data; // For unit tests.
+  }
+
+  async deleteObject(params: {
+    Bucket: string, // The name of the bucket. For example, 'sample_bucket_101'.
+    Key: string, // The name of the object. For example, 'sample_upload.txt'.
+  }) {
+    const results = await s3Client.send(new DeleteObjectCommand(params));
+    LOGGER.info(
+      "Successfully deleted " +
+      params.Key +
+      " from bucket " +
+      params.Bucket,
+      { results, params }
+    );
+    
+    return results;
+  }
+
+
+  async bucketExists(Bucket: string): Promise<boolean> {
+    try {
+      const response = await s3Client.send(new HeadBucketCommand({ Bucket }));
+      return true;
+    }
+    catch {
+      return false;
+    }
+  }
+}
+''')
+  
+
+  
   with open(f"generated-model-resources/repository.service.ts", 'w') as f:
     f.write(''.join(repository_service_contents))
 
   with open(f"generated-model-resources/openapi.json", 'w') as f:
     f.write(json.dumps(openapi_specs, indent = 2))
+
+  with open(f"common.regex.ts", 'w') as f:
+    f.write(regex_contents)
+
+  with open(f"s3.aws.ts", 'w') as f:
+    f.write(aws_s3_service)
   
 
 

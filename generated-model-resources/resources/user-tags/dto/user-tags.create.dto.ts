@@ -20,25 +20,32 @@ export class CreateUserTagDto implements Partial<UserTagEntity> {
   
   @IsDefined()
   @IsInt()
-id: number;
+  id: number;
+
   @IsOptional()
   @IsString()
-metadata?: string | null;
+  metadata?: string | null;
+
   @IsDefined()
   @IsString()
-create_at: string;
+  create_at: string;
+
   @IsOptional()
   @IsString()
-updated_at?: string | null;
+  updated_at?: string | null;
+
   @IsOptional()
   @IsString()
-deleted_at?: string | null;
+  deleted_at?: string | null;
+
   @IsDefined()
   @IsInt()
-user_id: number;
+  user_id: number;
+
   @IsDefined()
   @IsInt()
-tag_id: number;
+  tag_id: number;
+
 }
 
         

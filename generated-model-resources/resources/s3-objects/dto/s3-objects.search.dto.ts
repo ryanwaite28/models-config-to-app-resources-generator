@@ -26,52 +26,64 @@ export class SearchS3ObjectDto implements Partial<S3ObjectEntity> {
   @IsOptional()
   @IsString()
   @Matches(INTEGER_WITH_COMPARATOR_REGEX)
-id_op: string | null;
+  id_op: string | null;
+  
 
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-metadata: string | null;
+  metadata: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-create_at: string | null;
+  create_at: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-updated_at: string | null;
+  updated_at: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-deleted_at: string | null;
+  deleted_at: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-model_type: string | null;
+  model_type: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(INTEGER_WITH_COMPARATOR_REGEX)
-model_id_op: string | null;
+  model_id_op: string | null;
+  
 
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-mimetype: string | null;
+  mimetype: string | null;
+
   @IsOptional()
   @IsBoolean()
-is_private: boolean | null;
+  is_private: boolean | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-region: string | null;
+  region: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-bucket: string | null;
+  bucket: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-key: string | null;
+  key: string | null;
+
 }
 
         

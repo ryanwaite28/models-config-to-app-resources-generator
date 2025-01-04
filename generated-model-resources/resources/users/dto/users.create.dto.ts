@@ -20,73 +20,96 @@ export class CreateUserDto implements Partial<UserEntity> {
   
   @IsDefined()
   @IsInt()
-id: number;
+  id: number;
+
   @IsOptional()
   @IsString()
-metadata?: string | null;
+  metadata?: string | null;
+
   @IsDefined()
   @IsString()
-create_at: string;
+  create_at: string;
+
   @IsOptional()
   @IsString()
-updated_at?: string | null;
+  updated_at?: string | null;
+
   @IsOptional()
   @IsString()
-deleted_at?: string | null;
+  deleted_at?: string | null;
+
   @IsOptional()
   @IsString()
-stripe_customer_account_id?: string | null;
+  stripe_customer_account_id?: string | null;
+
   @IsOptional()
   @IsString()
-stripe_account_id?: string | null;
+  stripe_account_id?: string | null;
+
   @IsDefined()
   @IsBoolean()
-stripe_account_verified: boolean;
+  stripe_account_verified: boolean;
+
   @IsDefined()
   @IsBoolean()
-stripe_identity_verified: boolean;
+  stripe_identity_verified: boolean;
+
   @IsOptional()
   @IsString()
-first_name?: string | null;
+  first_name?: string | null;
+
   @IsOptional()
   @IsString()
-last_name?: string | null;
+  last_name?: string | null;
+
   @IsOptional()
   @IsString()
-bio?: string | null;
+  bio?: string | null;
+
   @IsOptional()
   @IsInt()
-icon_s3object_id?: number | null;
+  icon_s3object_id?: number | null;
+
   @IsOptional()
   @IsString()
-town?: string | null;
+  town?: string | null;
+
   @IsOptional()
   @IsString()
-city?: string | null;
+  city?: string | null;
+
   @IsOptional()
   @IsString()
-state?: string | null;
+  state?: string | null;
+
   @IsOptional()
   @IsInt()
-zipcode?: number | null;
+  zipcode?: number | null;
+
   @IsOptional()
   @IsString()
-country?: string | null;
+  country?: string | null;
+
   @IsOptional()
   @IsString()
-tags?: string | null;
+  tags?: string | null;
+
   @IsOptional()
   @IsString()
-specialties?: string | null;
+  specialties?: string | null;
+
   @IsDefined()
   @IsBoolean()
-person_verified: boolean;
+  person_verified: boolean;
+
   @IsDefined()
   @IsBoolean()
-email_verified: boolean;
+  email_verified: boolean;
+
   @IsDefined()
   @IsBoolean()
-phone_verified: boolean;
+  phone_verified: boolean;
+
 }
 
         

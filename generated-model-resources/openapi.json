@@ -120,7 +120,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/S3ObjectEntity"
+                    "$ref": "#/components/schemas/SearchS3ObjectDto"
                   }
                 }
               }
@@ -407,7 +407,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserEntity"
+                    "$ref": "#/components/schemas/SearchUserDto"
                   }
                 }
               }
@@ -702,7 +702,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserAuthProviderEntity"
+                    "$ref": "#/components/schemas/SearchUserAuthProviderDto"
                   }
                 }
               }
@@ -967,7 +967,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/TagEntity"
+                    "$ref": "#/components/schemas/SearchTagDto"
                   }
                 }
               }
@@ -1228,7 +1228,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserTagEntity"
+                    "$ref": "#/components/schemas/SearchUserTagDto"
                   }
                 }
               }
@@ -1554,6 +1554,72 @@
       "UpdateS3ObjectDto": {
         "type": "object",
         "description": "Update S3Object DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "model_type": {
+            "type": "string",
+            "format": "string",
+            "description": "Model type"
+          },
+          "model_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Model id"
+          },
+          "mimetype": {
+            "type": "string",
+            "format": "string",
+            "description": "Mimetype"
+          },
+          "is_private": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Is private"
+          },
+          "region": {
+            "type": "string",
+            "format": "string",
+            "description": "Region"
+          },
+          "bucket": {
+            "type": "string",
+            "format": "string",
+            "description": "Bucket"
+          },
+          "key": {
+            "type": "string",
+            "format": "string",
+            "description": "Key"
+          }
+        }
+      },
+      "SearchS3ObjectDto": {
+        "type": "object",
+        "description": "Search S3Object DTO",
         "properties": {
           "id": {
             "type": "integer",
@@ -1989,6 +2055,127 @@
           }
         }
       },
+      "SearchUserDto": {
+        "type": "object",
+        "description": "Search User DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "stripe_customer_account_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Stripe customer account id"
+          },
+          "stripe_account_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Stripe account id"
+          },
+          "stripe_account_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Stripe account verified"
+          },
+          "stripe_identity_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Stripe identity verified"
+          },
+          "first_name": {
+            "type": "string",
+            "format": "string",
+            "description": "First name"
+          },
+          "last_name": {
+            "type": "string",
+            "format": "string",
+            "description": "Last name"
+          },
+          "bio": {
+            "type": "string",
+            "format": "string",
+            "description": "Bio"
+          },
+          "icon_s3object_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Icon s3object id"
+          },
+          "town": {
+            "type": "string",
+            "format": "string",
+            "description": "Town"
+          },
+          "city": {
+            "type": "string",
+            "format": "string",
+            "description": "City"
+          },
+          "state": {
+            "type": "string",
+            "format": "string",
+            "description": "State"
+          },
+          "zipcode": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Zipcode"
+          },
+          "country": {
+            "type": "string",
+            "format": "string",
+            "description": "Country"
+          },
+          "tags": {
+            "type": "string",
+            "format": "string",
+            "description": "Tags"
+          },
+          "specialties": {
+            "type": "string",
+            "format": "string",
+            "description": "Specialties"
+          },
+          "person_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Person verified"
+          },
+          "email_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Email verified"
+          },
+          "phone_verified": {
+            "type": "boolean",
+            "format": "boolean",
+            "description": "Phone verified"
+          }
+        }
+      },
       "UserAuthProviderEntity": {
         "type": "object",
         "description": "UserAuthProvider entity",
@@ -2101,6 +2288,57 @@
       "UpdateUserAuthProviderDto": {
         "type": "object",
         "description": "Update UserAuthProvider DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "details": {
+            "type": "string",
+            "format": "string",
+            "description": "Details"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User id"
+          },
+          "provider_name": {
+            "type": "string",
+            "format": "string",
+            "description": "Provider name"
+          },
+          "provider_id": {
+            "type": "string",
+            "format": "string",
+            "description": "Provider id"
+          }
+        }
+      },
+      "SearchUserAuthProviderDto": {
+        "type": "object",
+        "description": "Search UserAuthProvider DTO",
         "properties": {
           "id": {
             "type": "integer",
@@ -2277,6 +2515,47 @@
           }
         }
       },
+      "SearchTagDto": {
+        "type": "object",
+        "description": "Search Tag DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "name": {
+            "type": "string",
+            "format": "string",
+            "description": "Name"
+          },
+          "description": {
+            "type": "string",
+            "format": "string",
+            "description": "Description"
+          }
+        }
+      },
       "UserTagEntity": {
         "type": "object",
         "description": "UserTag entity",
@@ -2368,6 +2647,47 @@
       "UpdateUserTagDto": {
         "type": "object",
         "description": "Update UserTag DTO",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id"
+          },
+          "metadata": {
+            "type": "string",
+            "format": "string",
+            "description": "Metadata"
+          },
+          "create_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Create at"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated at"
+          },
+          "deleted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Deleted at"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "User id"
+          },
+          "tag_id": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Tag id"
+          }
+        }
+      },
+      "SearchUserTagDto": {
+        "type": "object",
+        "description": "Search UserTag DTO",
         "properties": {
           "id": {
             "type": "integer",

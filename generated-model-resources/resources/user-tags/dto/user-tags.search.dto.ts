@@ -26,33 +26,40 @@ export class SearchUserTagDto implements Partial<UserTagEntity> {
   @IsOptional()
   @IsString()
   @Matches(INTEGER_WITH_COMPARATOR_REGEX)
-id_op: string | null;
+  id_op: string | null;
+  
 
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-metadata: string | null;
+  metadata: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-create_at: string | null;
+  create_at: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-updated_at: string | null;
+  updated_at: string | null;
+
   @IsOptional()
   @IsString()
   @Matches(ALPHANUMERIC_SPACE_DASH_UNDERSCORE_DOT_COMMA_COLON_SLASH_REGEX)
-deleted_at: string | null;
-  @IsOptional()
-  @IsString()
-  @Matches(INTEGER_WITH_COMPARATOR_REGEX)
-user_id_op: string | null;
+  deleted_at: string | null;
 
   @IsOptional()
   @IsString()
   @Matches(INTEGER_WITH_COMPARATOR_REGEX)
-tag_id_op: string | null;
+  user_id_op: string | null;
+  
+
+  @IsOptional()
+  @IsString()
+  @Matches(INTEGER_WITH_COMPARATOR_REGEX)
+  tag_id_op: string | null;
+  
 
 }
 

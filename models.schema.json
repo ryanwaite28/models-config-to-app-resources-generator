@@ -8,6 +8,10 @@
       "patternProperties": {
         "^([A-Z][a-zA-Z0-9]+)$": {
           "type": "object",
+          "required": [
+            "tableName",
+            "fields"
+          ],
           "properties": {
             "tableName": {
               "type": "string"
@@ -17,8 +21,12 @@
               "patternProperties": {
                 "^([a-z_]+)$": {
                   "type": "object",
+                  "required": [
+                    "dataType",
+                    "required"
+                  ],
                   "properties": {
-                    "type": {
+                    "dataType": {
                       "type": "string",
                       "enum": [
                         "string",
@@ -66,75 +74,90 @@
                         "key"
                       ]
                     }
-                  },
-                  "required": [
-                    "type",
-                    "required"
-                  ]
+                  }
                 }
               }
             },
-            "relationships": {
+            "indexes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "unique": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "relationships": {
+      "type": "object",
+      "patternProperties": {
+        "^([A-Z][a-zA-Z0-9]+)$": {
+          "type": "object",
+          "properties": {
+            "hasOne": {
               "type": "object",
               "patternProperties": {
                 "^([A-Z][a-zA-Z0-9]+)$": {
                   "type": "object",
                   "properties": {
-                    "type": {
-                      "type": "string"
-                    },
-                    "model": {
-                      "type": "string"
-                    },
-                    "alias": {
-                      "type": "string"
-                    },
-                    "foreignKey": {
-                      "type": "string"
-                    },
-                    "sourceKey": {
-                      "type": "string"
-                    },
-                    "targetKey": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "type",
-                    "model",
-                    "foreignKey"
-                  ]
+                    "alias": { "type": "string", "$comment": "Alias for the HasOne relationship" },
+                    "foreignKey": { "type": "string" },
+                    "sourceKey": { "type": "string" }
+                  }
                 }
               }
             },
-            "indexes": {
+            "hasMany": {
               "type": "object",
               "patternProperties": {
-                "^([a-z_]+)$": {
+                "^([A-Z][a-zA-Z0-9]+)$": {
                   "type": "object",
                   "properties": {
-                    "fields": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "unique": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "fields",
-                    "unique"
-                  ]
+                    "alias": { "type": "string" },
+                    "foreignKey": { "type": "string" },
+                    "sourceKey": { "type": "string" }
+                  }
+                }
+              }
+            },
+            "belongsToOne": {
+              "type": "object",
+              "patternProperties": {
+                "^([A-Z][a-zA-Z0-9]+)$": {
+                  "type": "object",
+                  "properties": {
+                    "alias": { "type": "string" },
+                    "foreignKey": { "type": "string" },
+                    "targetKey": { "type": "string" }
+                  }
+                }
+              }
+            },
+            "belongsToMany": {
+              "type": "object",
+              "patternProperties": {
+                "^([A-Z][a-zA-Z0-9]+)$": {
+                  "type": "object",
+                  "properties": {
+                    "alias": { "type": "string" },
+                    "foreignKey": { "type": "string" },
+                    "targetKey": { "type": "string" }
+                  }
                 }
               }
             }
-          },
-          "required": [
-            "tableName",
-            "fields"
-          ]
+          }
         }
       }
     }

@@ -20,31 +20,40 @@ export class CreateUserAuthProviderDto implements Partial<UserAuthProviderEntity
   
   @IsDefined()
   @IsInt()
-id: number;
+  id: number;
+
   @IsOptional()
   @IsString()
-metadata?: string | null;
+  metadata?: string | null;
+
   @IsDefined()
   @IsString()
-create_at: string;
+  create_at: string;
+
   @IsOptional()
   @IsString()
-updated_at?: string | null;
+  updated_at?: string | null;
+
   @IsOptional()
   @IsString()
-deleted_at?: string | null;
+  deleted_at?: string | null;
+
   @IsOptional()
   @IsString()
-details?: string | null;
+  details?: string | null;
+
   @IsDefined()
   @IsInt()
-user_id: number;
+  user_id: number;
+
   @IsDefined()
   @IsString()
-provider_name: string;
+  provider_name: string;
+
   @IsDefined()
   @IsString()
-provider_id: string;
+  provider_id: string;
+
 }
 
         
