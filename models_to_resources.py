@@ -1158,6 +1158,8 @@ def convert_models_to_resources():
   models_file_cotents = []
   model_relationships_file_cotents = []
   
+  graphql_schema_file_cotents = []
+  
   contents: dict = {}
 
   with open("model-to-resource.config.json", 'r') as f:
@@ -1171,7 +1173,26 @@ def convert_models_to_resources():
     print("No models found in config.")
     return
   
+  Path(f"generated-model-resources/graphql/schemas").mkdir(parents = True, exist_ok = True)
+  
   for model_name in model_names:
+
+    kebob_name = camel_to_kebab(model_name)
+    snake_name = camel_to_snake(model_name)
+    
+    model_name_plural = pluralize(model_name)
+    model_var_name = model_name[0].lower() + model_name[1:]
+    
+    singular = model_name.lower()
+    plural = (singular[:-1] + 'ies') if (singular[-1] == 'y') else (singular + 's')
+    
+    kebob_name_plural = pluralize(kebob_name)
+    snake_name_plural = pluralize(snake_name)
+    
+    singular_caps = singular.capitalize()
+    plural_caps = plural.capitalize()
+
+    # --- #
 
     model_config = contents.get("models", {}).get(model_name, {})
 
@@ -1197,13 +1218,66 @@ export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'},
   {'\n  '.join([ f"{field}: {{ type: DataTypes.{fields[field]['dataType'].upper()}, allowNull: {'false' if (fields[field]['required']) else 'true'}{', primaryKey: true, autoIncrement: true' if fields[field].get('primaryKey', False) else ''} }}," for field in field_names ])}
 }});
   '''
+    
+    graphql_model_schema_cotents = f'''\
+type {model_name} {{
+  {'\n  '.join([ f"{field}: {'Int' if ('number' in field_definitions_by_model[model_name][index]) else 'String' if ('string' in field_definitions_by_model[model_name][index]) else 'Boolean'}" for index, field in enumerate(fields) ])}
+  <relationships>
+}}
+    '''
+
+    graphql_model_object_contents = f'''\
+import {{
+  GraphQLFieldResolver,
+  GraphQLResolveInfo,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLInt,
+  GraphQLFieldConfig,
+  GraphQLBoolean,
+}} from 'graphql';
+import {{ Container }} from "typedi";
+
+export const Root{model_name}ByIdResolver: GraphQLFieldResolver<any, any> = (
+  source: any,
+  args: {{ id: number }},
+  context: any,
+  info: GraphQLResolveInfo
+) => {{
+  const {model_name}Repo: IModelCrud<{model_name}Entity> = Container.get({snake_name.upper()}_REPO_INJECT_TOKEN);
+  return {model_name}Repo.findById(args.id);
+}}
+
+export const {model_name}Schema = new GraphQLObjectType({{
+  name: '{model_name}',
+  fields: {{
+    {'\n    '.join([ f"{field}: {'{ type: GraphQLInt }' if ('number' in field_definitions_by_model[model_name][index]) else '{ type: GraphQLString }' if ('string' in field_definitions_by_model[model_name][index]) else '{ type: GraphQLBoolean }'}," for index, field in enumerate(fields) ])}
+    <relationships>
+  }},
+}});
+
+export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
+  type: {model_name}Schema,
+  args: {{
+    id: {{ type: GraphQLInt, description: `{model_name} Id` }}
+  }},
+  resolve: Root{model_name}ByIdResolver
+}};
+    '''
+
+
+
 # }}, {{ indexes: [{{ unique: f{'true' if model_config.get('indexes', {}).get('unique', False) else 'false'}, fields: [{ ', '.join([]) }] }}] }});
 
     relationships = relationships_definitions.get(model_name, None)
     if not relationships:
       interface_contents = interface_contents.replace("\n  <relationships>", "")
+      graphql_model_schema_cotents = graphql_model_schema_cotents.replace("\n  <relationships>", "")
+      graphql_model_object_contents = graphql_model_object_contents.replace("\n    <relationships>", "")
     else:
       relationship_contents = []
+      graphql_model_relationships_cotents = []
+      graphql_object_relationships_cotents = []
 
       relationshipsHasOne = relationships.get("hasOne", {})
       relationshipsHasMany = relationships.get("hasMany", {})
@@ -1211,24 +1285,39 @@ export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'},
       relationshipsBelongsToMany = relationships.get("belongsToMany", {})
 
       for model in relationshipsHasOne.keys():
+        graphql_object_relationships_cotents.append(f'{relationshipsHasOne[model]['alias']}: {{ type: {model}Schema }},')
+        graphql_model_relationships_cotents.append(f'{relationshipsHasOne[model]['alias']}: {model}')
         relationship_contents.append(f'{relationshipsHasOne[model]['alias']}?: {model}Entity;')
         model_relationships_file_cotents.append(f'{model_name}.hasOne({model}, {{ as: "{relationshipsHasOne[model]['alias']}", foreignKey: "{relationshipsHasOne[model]['foreignKey']}", sourceKey: "{relationshipsHasOne[model]['sourceKey']}" }});')
       
       for model in relationshipsHasMany.keys():
+        graphql_object_relationships_cotents.append(f'{relationshipsHasMany[model]['alias']}: {{ type: {model}Schema }},')
+        graphql_model_relationships_cotents.append(f'{relationshipsHasMany[model]['alias']}: [{model}]')
         relationship_contents.append(f'{relationshipsHasMany[model]['alias']}?: {model}Entity[];')
         model_relationships_file_cotents.append(f'{model_name}.hasMany({model}, {{ as: "{relationshipsHasMany[model]['alias']}", foreignKey: "{relationshipsHasMany[model]['foreignKey']}", sourceKey: "{relationshipsHasMany[model]['sourceKey']}" }});')
       
       for model in relationshipsBelongsTo.keys():
+        graphql_object_relationships_cotents.append(f'{relationshipsBelongsTo[model]['alias']}: {{ type: {model}Schema }},')
+        graphql_model_relationships_cotents.append(f'{relationshipsBelongsTo[model]['alias']}: {model}')
         relationship_contents.append(f'{relationshipsBelongsTo[model]['alias']}?: {model}Entity;')
         model_relationships_file_cotents.append(f'{model_name}.belongsTo({model}, {{ as: "{relationshipsBelongsTo[model]['alias']}", foreignKey: "{relationshipsBelongsTo[model]['foreignKey']}", targetKey: "{relationshipsBelongsTo[model]['targetKey']}" }});')
       
       for model in relationshipsBelongsToMany.keys():
+        graphql_object_relationships_cotents.append(f'{relationshipsBelongsToMany[model]['alias']}: {{ type: {model}Schema }},')
+        graphql_model_relationships_cotents.append(f'{relationshipsBelongsToMany[model]['alias']}: [{model}]')
         relationship_contents.append(f'{relationshipsBelongsToMany[model]['alias']}?: {model}Entity[];')
         model_relationships_file_cotents.append(f'{model_name}.belongsToMany({model}, {{ as: "{relationshipsBelongsToMany[model]['alias']}", foreignKey: "{relationshipsBelongsToMany[model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[model]['targetKey']}" }});')
 
+      graphql_model_object_contents = graphql_model_object_contents.replace("<relationships>", "\n    " + "\n    ".join(graphql_object_relationships_cotents))
+      graphql_model_schema_cotents = graphql_model_schema_cotents.replace("<relationships>", "\n  " + "\n  ".join(graphql_model_relationships_cotents))
       interface_contents = interface_contents.replace("<relationships>", "\n  " + "\n  ".join(relationship_contents))
+
+    
+    with open(f"generated-model-resources/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
+      f.write(graphql_model_object_contents)
       
     interface_file_contents.append(interface_contents)
+    graphql_schema_file_cotents.append(graphql_model_schema_cotents)
 
     models_file_cotents.append(model_object_contents)
 
@@ -1253,12 +1342,16 @@ export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'},
       user_owner_field_by_model[model_name] = field
 
   joined_interface_contents = "\n\n".join(interface_file_contents)
+  joined_graphql_schema_contents = "\n\n".join(graphql_schema_file_cotents)
 
   models_file_cotents.extend(model_relationships_file_cotents)
   joined_model_object_contents = "\n\n".join(models_file_cotents)
 
   with open(f"generated-model-resources/model-interfaces-converted.ts", 'w') as f:
     f.write(joined_interface_contents)
+
+  with open(f"generated-model-resources/schema.graphql", 'w') as f:
+    f.write(joined_graphql_schema_contents)
 
   with open(f"generated-model-resources/models.sequelize.ts", 'w') as f:
     f.write(joined_model_object_contents)
