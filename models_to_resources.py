@@ -1252,7 +1252,7 @@ def convert_models_to_resources():
   
   contents: dict = {}
 
-  with open("model-to-resource.config.json", 'r') as f:
+  with open("models.json", 'r') as f:
     contents = json.loads(f.read())
     
   relationships_definitions = contents.get("relationships", {})
@@ -1428,7 +1428,7 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
     }},''')
         graphql_model_relationships_cotents.append(f'{relationshipsHasMany[relation_model]['alias']}({relationshipsHasMany[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsHasMany[relation_model]['foreignKey'])if not is_through_relation else getGraphqlSchemaType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])}): [{relation_model}]')
         relationship_contents.append(f'{relationshipsHasMany[relation_model]['alias']}?: {relation_model}Entity[];')
-        model_relationships_file_cotents.append(f'{model_name}.hasMany({relation_model}, {{ as: "{relationshipsHasMany[relation_model]['alias']}", foreignKey: "{relationshipsHasMany[relation_model]['foreignKey']}", sourceKey: "{relationshipsHasMany[relation_model]['sourceKey']}" }});')
+        model_relationships_file_cotents.append(f'{model_name}.hasMany({relation_model}, {{ as: "{relationshipsHasMany[relation_model]['alias']}", foreignKey: "{relationshipsHasMany[relation_model]['foreignKey']}", sourceKey: "{relationshipsHasMany[relation_model]['sourceKey']}"{f', through: "{relationshipsHasMany[relation_model]['through']}"' if is_through_relation else ''} }});')
       
       for relation_model in relationshipsBelongsTo.keys():
         graphql_object_relationships_cotents.append(f'''{relationshipsBelongsTo[relation_model]['alias']}: {{
@@ -1464,7 +1464,7 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
     }},''')
         graphql_model_relationships_cotents.append(f'{relationshipsBelongsToMany[relation_model]['alias']}({relationshipsBelongsToMany[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getGraphqlSchemaType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['foreignKey'])}): [{relation_model}]')
         relationship_contents.append(f'{relationshipsBelongsToMany[relation_model]['alias']}?: {relation_model}Entity[];')
-        model_relationships_file_cotents.append(f'{model_name}.belongsToMany({relation_model}, {{ as: "{relationshipsBelongsToMany[relation_model]['alias']}", foreignKey: "{relationshipsBelongsToMany[relation_model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[relation_model]['targetKey']}" }});')
+        model_relationships_file_cotents.append(f'{model_name}.belongsToMany({relation_model}, {{ as: "{relationshipsBelongsToMany[relation_model]['alias']}", foreignKey: "{relationshipsBelongsToMany[relation_model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[relation_model]['targetKey']}"{f', through: "{relationshipsBelongsToMany[relation_model]['through']}"' if is_through_relation else ''} }});')
 
       graphql_model_object_contents = graphql_model_object_contents.replace("<relationships>", "\n    " + "\n    ".join(graphql_object_relationships_cotents))
       graphql_model_schema_cotents = graphql_model_schema_cotents.replace("<relationships>", "\n  " + "\n  ".join(graphql_model_relationships_cotents))
