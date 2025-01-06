@@ -1,0 +1,198 @@
+
+version: "3.8"
+
+networks:
+  # https://splunk.github.io/docker-splunk/EXAMPLES.html#create-standalone-and-universal-forwarder
+  splunknet:
+    driver: bridge
+    attachable: true
+
+volumes:
+
+  # https://splunk.github.io/docker-splunk/STORAGE_OPTIONS.html
+  # https://docs.docker.com/config/containers/logging/splunk/
+
+  app-db-vol:
+    driver: local
+
+  file-server-vol:
+    driver: local
+
+  localstack-vol:
+    driver: local
+
+  localstack_pods:
+    driver: local
+
+  localstack-persistence-vol:
+    driver: local
+
+  opt-splunk-etc:
+    driver: local
+
+  opt-splunk-var:
+    driver: local
+
+  redis-cache-vol:
+    driver: local
+
+services:
+
+  # uf1:
+  #   networks:
+  #     splunknet:
+  #       aliases:
+  #         - uf1
+  #   image: ${UF_IMAGE:-splunk/universalforwarder:latest}
+  #   hostname: uf1
+  #   container_name: uf1
+  #   environment:
+  #     - SPLUNK_START_ARGS=--accept-license
+  #     - SPLUNK_STANDALONE_URL=so1
+  #     - SPLUNK_ADD=udp 1514,monitor /var/log/*
+  #     - SPLUNK_PASSWORD=password
+  #   ports:
+  #     - 8089
+
+  # so1:
+  #   networks:
+  #     splunknet:
+  #       aliases:
+  #         - so1
+  #   image: ${SPLUNK_IMAGE:-splunk/splunk:latest}
+  #   hostname: so1
+  #   container_name: so1
+  #   environment:
+  #     - SPLUNK_START_ARGS=--accept-license
+  #     - SPLUNK_STANDALONE_URL=so1
+  #     - SPLUNK_PASSWORD=password
+  #     - SPLUNK_LICENSE_URI=Free
+  #   ports:
+  #     - 8000
+  #     - 8089
+  #   volumes:
+  #     - opt-splunk-etc:/opt/splunk/etc
+  #     - opt-splunk-var:/opt/splunk/var
+
+  # AWS mock - https://hub.docker.com/r/localstack/localstack
+  # https://docs.localstack.cloud/user-guide/integrations/sdks/javascript/
+  # aws-localstack:
+  #   image: localstack/localstack
+  #   ports:
+  #     - "0.0.0.0:4566:4566"            # LocalStack Gateway
+  #     - "0.0.0.0:4510-4559:4510-4559"  # external services port range
+  #   environment:
+  #     # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+  #     DEBUG: ${DEBUG:-1}
+  #     AWS_DEFAULT_REGION: us-east-1
+  #   volumes:
+  #     # - "localstack-vol:/var/lib/localstack"
+  #     # - "/var/run/docker.sock:/var/run/docker.sock"
+
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ./boot.sh:/etc/localstack/init/boot.d/boot.sh
+  #     - ./ready.sh:/etc/localstack/init/ready.d/ready.sh
+  #     - ./shutdown.sh:/etc/localstack/init/shutdown.d/shutdown.sh
+  #     - localstack_pods:/pods
+
+  # https://github.com/localstack/localstack/issues/6281
+  # https://hub.docker.com/r/gresau/localstack-persist
+  localstack-persistence:
+    image: gresau/localstack-persist:3 # instead of localstack/localstack:3
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-persistence-vol:/persisted-data
+
+  # Databases
+
+  app-db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - '5431:5432'
+    volumes: 
+      - app-db-vol:/var/lib/postgresql/data
+
+  # Cache
+
+  redis-cache:
+    image: redis:latest
+    hostname: redis-cache
+    environment:
+      PASSWORD: password
+    command: redis-server --requirepass password
+    deploy:
+      replicas: 1
+    ports:
+      - '6378:6379'
+    volumes:
+      - redis-cache-vol:/data
+
+
+  # File-Server - https://hub.docker.com/r/flaviostutz/simple-file-server
+  # simple-file-server:
+  #   build: .
+  #   image: flaviostutz/simple-file-server
+  #   ports:
+  #     - "4000:4000"
+  #   environment:
+  #     - WRITE_SHARED_KEY=
+  #     - READ_SHARED_KEY=
+  #     - LOCATION_BASE_URL=http://localhost:4000
+  #     - LOG_LEVEL=debug
+  #     - CHOKIDAR_USEPOLLING=true
+  #   volumes:
+  #     - file-server-vol:/data
+
+
+  # Servers
+
+  # app-server:
+  #   build:
+  #     context: .
+  #     dockerfile: dockerfiles/expressjs.Dockerfile
+  #     args:
+  #       APP_NAME: app-server-expressjs
+  #       SHARED_STORAGE_VOL_PATH: /app/shared-files
+  #       LOGS_PATH: /app/logs
+  #   command: npm run nx serve app-server
+  #   deploy:
+  #     replicas: 1
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     APP_ENV: LOCAL
+  #     APP_MACHINE_NAME: APP_SERVER_EXPRESSJS
+  #     APP_DISPLAY_NAME: "App Server ExpressJS"
+  #     LOGS_PATH: /app/logs
+  #     COMPONENT: app-server-expressjs
+  #     SHARED_STORAGE_VOL_PATH: /app/shared-files
+  #     PORT: 4000
+  #     JWT_SECRET: "0123456789"
+  #     DATABASE_URL: postgres://postgres:postgres_password@app-db:5432
+  #     CORS_WHITELIST_ORIGINS: http://localhost:4200,http://localhost:7600
+  #     REDIS_URL: redis://default:password@redis-cache:6379
+
+  #     PLATFORM_AWS_S3_REGION: us-east-1
+  #     PLATFORM_AWS_S3_BUCKET: public-assets
+  #     PLATFORM_AWS_S3_BUCKET_SERVE_ORIGIN: http://localhost:4566/public-assets
+  #     PLATFORM_AWS_S3_ORIGIN: http://s3.us-east-1.localhost.localstack.cloud:4566
+  #     PLATFORM_AWS_S3_ENDPOINT: http://localstack-persistence:4566
+
+  #     SPLUNK_TOKEN: ""
+  #     SPLUNK_HOST: so1
+
+  #   depends_on:
+  #     - app-db
+  #     # - aws-localstack
+  #     - localstack-persistence
+  #   ports:
+  #     - '4000:4000'
+  #   volumes:
+  #     - /app/node_modules
+  #     - './src:/app/src'
+  #     - './app-logs:/app/logs'
+

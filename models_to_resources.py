@@ -23,9 +23,60 @@ my_merger = Merger(
     ["override"]
 )
 
+model_config_to_drizzle_type_map = {
+  'string': 'varchar',
+  'text': 'text',
+  'integer': 'integer',
+  'float': 'numeric',
+  'boolean': 'boolean',
+  'date': 'date',
+  'datetime': 'timestamp',
+  'time': 'time',
+  'json': 'json',
+  'jsonb': 'jsonb',
+}
+
+model_config_to_graphql_schema_type_map = {
+  'string': 'String',
+  'text': 'String',
+  'integer': 'Int',
+  'float': 'Float',
+  'boolean': 'Boolean',
+  'date': 'Date',
+  'datetime': 'Date',
+  'time': 'Date',
+  'json': 'String',
+  'jsonb': 'String',
+}
+
+model_config_to_graphql_object_type_map = {
+  'string': 'GraphQLString',
+  'text': 'GraphQLString',
+  'integer': 'GraphQLInt',
+  'float': 'GraphQLFloat',
+  'boolean': 'GraphQLBoolean',
+  'date': 'GraphQLDate',
+  'datetime': 'GraphQLDate',
+  'time': 'GraphQLDate',
+  'json': 'GraphQLString',
+  'jsonb': 'GraphQLString',
+}
+
+model_config_to_typescript_type_map = {
+  'string': 'string',
+  'text': 'string',
+  'integer': 'number',
+  'float': 'number',
+  'boolean': 'boolean',
+  'date': 'string',
+  'datetime': 'string',
+  'time': 'string',
+  'json': 'string',
+  'jsonb': 'string',
+}
 
 
-Path('generated-model-resources').mkdir(parents = True, exist_ok = True)
+Path('app/src').mkdir(parents = True, exist_ok = True)
 
 
 
@@ -109,9 +160,12 @@ def format_dto_fields_for_query(f: str) -> str:
   
 user_owner_field_by_model = {}
 
+global_model_names: list[str] = []
+
 field_names_by_model: dict[list[str]] = {}
-relationships_definitions = []
+field_configs_by_model: dict[dict] = {}
 field_definitions_by_model: dict[list[str]] = {}
+relationships_definitions = []
 
 
 def makeModelVarName(model_name: str) -> str:
@@ -444,22 +498,7 @@ def create_resource(
   singular_caps = singular.capitalize()
   plural_caps = plural.capitalize()
   
-  # print('names: ', {
-  #   "model_name": model_name,
-  #   "kebob_name": kebob_name,
-  #   "kebob_name_plural": kebob_name_plural,
-  #   "snake_name": snake_name,
-  #   "snake_name_plural": snake_name_plural,
-  #   "model_name_plural": model_name_plural,
-  #   "model_var_name": model_var_name,
-  #   "singular": singular,
-  #   "plural": plural,
-  #   "singular_caps": singular_caps,
-  #   "plural_caps": plural_caps,
-  # })
-
-  # base_path = f"src/apps/app-server/src/resources{plural}"
-  base_path = 'generated-model-resources/resources'
+  base_path = 'app/src/resources'
 
 
 
@@ -1070,31 +1109,31 @@ export class Search{model_name}Dto implements Partial<{model_name}Entity> {{
       f.write(search_dto_contents)
 
 
-  # add copy to generated-model-resources for reference
+  # add copy to src for reference
   
-  Path(f"generated-model-resources/resources/{kebob_name_plural}").mkdir(parents = True, exist_ok = True)
-  Path(f"generated-model-resources/resources/{kebob_name_plural}/dto").mkdir(parents = True, exist_ok = True)
-  Path(f"generated-model-resources/resources/{kebob_name_plural}/dto/validations").mkdir(parents = True, exist_ok = True)
+  Path(f"app/src/resources/{kebob_name_plural}").mkdir(parents = True, exist_ok = True)
+  Path(f"app/src/resources/{kebob_name_plural}/dto").mkdir(parents = True, exist_ok = True)
+  Path(f"app/src/resources/{kebob_name_plural}/dto/validations").mkdir(parents = True, exist_ok = True)
 
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/{kebob_name_plural}.controller.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.controller.ts"), 'w') as f:
     f.write(controller_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/{kebob_name_plural}.guard.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.guard.ts"), 'w') as f:
     f.write(guard_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/{kebob_name_plural}.service.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.service.ts"), 'w') as f:
     f.write(service_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/{kebob_name_plural}.repository.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.repository.ts"), 'w') as f:
     f.write(repository_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/dto/{kebob_name_plural}.create.dto.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.create.dto.ts"), 'w') as f:
     f.write(create_dto_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/dto/{kebob_name_plural}.update.dto.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.update.dto.ts"), 'w') as f:
     f.write(update_dto_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/dto/{kebob_name_plural}.search.dto.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.search.dto.ts"), 'w') as f:
     f.write(search_dto_contents)
   
 
@@ -1103,11 +1142,60 @@ def getFieldDef(field, field_config):
   return f'{field}: {'string' if (field_config['dataType'] in ['string', 'text', 'datetime', 'uuid', 'json', 'jsonb']) else 'number' if (field_config['dataType'] in ['integer', 'float', 'double', 'number']) else 'boolean'}{' | null' if not (field_config['required']) else ''};'
 
 
+def getGraphqlSchemaType(model, field_name):
+  field_config = field_configs_by_model[model][field_name]
+  schema_type = model_config_to_graphql_schema_type_map[field_config['dataType']]
+  return schema_type
+
+def getGraphqlObjectType(model, field_name):
+  field_config = field_configs_by_model[model][field_name]
+  object_type = model_config_to_graphql_object_type_map[field_config['dataType']]
+  return object_type
+
+
+def getTypeScriptType(model, field_name):
+  field_config = field_configs_by_model[model][field_name]
+  typescript_type = model_config_to_typescript_type_map[field_config['dataType']]
+  return typescript_type
+
+
+def getDrizzleDef(model: str, field_name: str):
+  field_config = field_configs_by_model[model][field_name]
+  if (field_config['dataType'] == 'integer') and ('primaryKey' in field_config) and field_config['primaryKey'] == True:
+    return "integer().primaryKey().generatedAlwaysAsIdentity(),"
+  
+  column_def = ""
+  
+  drizzle_type = model_config_to_drizzle_type_map[field_config['dataType']]
+
+  column_def += f"{drizzle_type}({ f"{{ minLength: {field_config['minLength']}, maxLength: {field_config['maxLength']} }}" if ('minLength' in field_config and 'maxLength' in field_config) else f"{{ minLength: {field_config['minLength']} }}" if ('minLength' in field_config) else f"{{ maxLength: {field_config['maxLength']} }}" if ('maxLength' in field_config) else "" })"
+
+  if ('required' in field_config) and (field_config['required']):
+    column_def += ".notNull()"
+
+  if ('unique' in field_config) and (field_config['unique']):
+    column_def += ".unique()"
+
+  if ('defaultValue' in field_config):
+    if field_config['defaultValue'] == None:
+      column_def += ".default(null)"
+    elif field_config['defaultValue'] == "now":
+      column_def += ".defaultNow()"
+    else:
+      column_def += f".default({ f"\"{field_config['defaultValue']}\"" if (field_config['dataType'] in ['string', 'text', 'time', 'date', 'datetime']) else 'false' if (field_config['defaultValue'] == False) else 'true' if (field_config['defaultValue'] == True) else "null" if (field_config['defaultValue'] == None) else field_config['defaultValue'] })"
+
+  column_def += ","
+
+  return column_def
+
+
 def convert_models_to_resources():
   
   global user_owner_field_by_model
   global field_definitions_by_model
   global field_names_by_model
+  global field_configs_by_model
+  global global_model_names
 
 
 
@@ -1157,8 +1245,10 @@ def convert_models_to_resources():
 
   models_file_cotents = []
   model_relationships_file_cotents = []
+  drizzle_file_cotents = []
   
   graphql_schema_file_cotents = []
+  graphql_root_schema_fields = []
   
   contents: dict = {}
 
@@ -1173,7 +1263,26 @@ def convert_models_to_resources():
     print("No models found in config.")
     return
   
-  Path(f"generated-model-resources/graphql/schemas").mkdir(parents = True, exist_ok = True)
+  global_model_names = model_names
+  
+  Path(f"app/src/graphql/schemas").mkdir(parents = True, exist_ok = True)
+
+  
+  
+  for model_name in model_names:
+
+    model_config = contents.get("models", {}).get(model_name, {})
+
+    field_configs = model_config.get('fields', {})
+    
+    field_names = field_configs.keys()
+
+    field_names_by_model[model_name] = field_names
+    field_configs_by_model[model_name] = field_configs
+
+    field_definitions_by_model[model_name] = [getFieldDef(field, field_configs[field]) for field in field_names]
+
+  
   
   for model_name in model_names:
 
@@ -1181,28 +1290,17 @@ def convert_models_to_resources():
     snake_name = camel_to_snake(model_name)
     
     model_name_plural = pluralize(model_name)
-    model_var_name = model_name[0].lower() + model_name[1:]
-    
-    singular = model_name.lower()
-    plural = (singular[:-1] + 'ies') if (singular[-1] == 'y') else (singular + 's')
     
     kebob_name_plural = pluralize(kebob_name)
-    snake_name_plural = pluralize(snake_name)
-    
-    singular_caps = singular.capitalize()
-    plural_caps = plural.capitalize()
 
+    model_var_name = model_name[0].lower() + model_name[1:]
+    
     # --- #
 
-    model_config = contents.get("models", {}).get(model_name, {})
 
-    fields = model_config.get('fields', {})
+    fields = field_configs_by_model[model_name]
     
     field_names = fields.keys()
-
-    field_names_by_model[model_name] = field_names
-
-    field_definitions_by_model[model_name] = [getFieldDef(field, fields[field]) for field in field_names]
     
 
 
@@ -1221,10 +1319,21 @@ export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'},
     
     graphql_model_schema_cotents = f'''\
 type {model_name} {{
-  {'\n  '.join([ f"{field}: {'Int' if ('number' in field_definitions_by_model[model_name][index]) else 'String' if ('string' in field_definitions_by_model[model_name][index]) else 'Boolean'}" for index, field in enumerate(fields) ])}
+  {'\n  '.join([ f"{field}: {'Int' if ('number' in field_definitions_by_model[model_name][index]) else 'String' if ('string' in field_definitions_by_model[model_name][index]) else 'Boolean'}" for index, field in enumerate(field_names) ])}
   <relationships>
 }}
     '''
+
+    graphql_root_schema_model_field = f'''{model_var_name}: Root{model_name}Query,'''
+    graphql_root_schema_fields.append(graphql_root_schema_model_field)
+    
+
+
+    drizzle_model_contents = f'''\
+export const {model_name_plural}Table = pgTable({f'"{model_config['tableName']}"'}, {{
+  {'\n  '.join([ f"{field_name}: {getDrizzleDef(model_name, field_name)}" for index, field_name in enumerate(fields) ])}
+}});
+  '''
 
     graphql_model_object_contents = f'''\
 import {{
@@ -1284,40 +1393,90 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
       relationshipsBelongsTo = relationships.get("belongsToOne", {})
       relationshipsBelongsToMany = relationships.get("belongsToMany", {})
 
-      for model in relationshipsHasOne.keys():
-        graphql_object_relationships_cotents.append(f'{relationshipsHasOne[model]['alias']}: {{ type: {model}Schema }},')
-        graphql_model_relationships_cotents.append(f'{relationshipsHasOne[model]['alias']}: {model}')
-        relationship_contents.append(f'{relationshipsHasOne[model]['alias']}?: {model}Entity;')
-        model_relationships_file_cotents.append(f'{model_name}.hasOne({model}, {{ as: "{relationshipsHasOne[model]['alias']}", foreignKey: "{relationshipsHasOne[model]['foreignKey']}", sourceKey: "{relationshipsHasOne[model]['sourceKey']}" }});')
+      for relation_model in relationshipsHasOne.keys():
+        graphql_object_relationships_cotents.append(f'''{relationshipsHasOne[relation_model]['alias']}: {{
+      type: {relation_model}Schema,
+      resolve: (source: any, args: {{ {relationshipsHasOne[relation_model]['foreignKey']}: {getTypeScriptType(relation_model, relationshipsHasOne[relation_model]['foreignKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
+        const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
+        return {relation_model}Repo.findOne({{
+          where: {{ {relationshipsHasOne[relation_model]['foreignKey']}: source.{relationshipsHasOne[relation_model]['sourceKey']} }}
+        }});
+      }},
+    }},''')
+        graphql_model_relationships_cotents.append(f'{relationshipsHasOne[relation_model]['alias']}({relationshipsHasOne[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsHasOne[relation_model]['foreignKey'])}): {relation_model}')
+        relationship_contents.append(f'{relationshipsHasOne[relation_model]['alias']}?: {relation_model}Entity;')
+        model_relationships_file_cotents.append(f'{model_name}.hasOne({relation_model}, {{ as: "{relationshipsHasOne[relation_model]['alias']}", foreignKey: "{relationshipsHasOne[relation_model]['foreignKey']}", sourceKey: "{relationshipsHasOne[relation_model]['sourceKey']}" }});')
       
-      for model in relationshipsHasMany.keys():
-        graphql_object_relationships_cotents.append(f'{relationshipsHasMany[model]['alias']}: {{ type: {model}Schema }},')
-        graphql_model_relationships_cotents.append(f'{relationshipsHasMany[model]['alias']}: [{model}]')
-        relationship_contents.append(f'{relationshipsHasMany[model]['alias']}?: {model}Entity[];')
-        model_relationships_file_cotents.append(f'{model_name}.hasMany({model}, {{ as: "{relationshipsHasMany[model]['alias']}", foreignKey: "{relationshipsHasMany[model]['foreignKey']}", sourceKey: "{relationshipsHasMany[model]['sourceKey']}" }});')
+      for relation_model in relationshipsHasMany.keys():
+        is_through_relation = relationshipsHasMany[relation_model].get('through', False)
+        use_relation_model = relationshipsHasMany[relation_model]['through'] if is_through_relation else relation_model
+
+        graphql_object_relationships_cotents.append(f'''{relationshipsHasMany[relation_model]['alias']}: {{
+      type: {relation_model}Schema,
+      resolve: (source: any, args: {{ {relationshipsHasMany[relation_model]['foreignKey']}: {getTypeScriptType(relation_model, relationshipsHasMany[relation_model]['foreignKey']) if not is_through_relation else getTypeScriptType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
+        const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
+        return {relation_model}Repo.findAll({{ {f'''
+          include: [{{
+            model: {relationshipsHasMany[relation_model]['through']},
+            where: {{ {relationshipsHasMany[relation_model]['foreignKey']}: source.{relationshipsHasMany[relation_model]['sourceKey']} }}
+          }}]''' 
+          if is_through_relation else f'''
+          where: {{ {relationshipsHasMany[relation_model]['foreignKey']}: source.{relationshipsHasMany[relation_model]['sourceKey']} }}\
+          '''}
+        }});
+      }},
+    }},''')
+        graphql_model_relationships_cotents.append(f'{relationshipsHasMany[relation_model]['alias']}({relationshipsHasMany[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsHasMany[relation_model]['foreignKey'])if not is_through_relation else getGraphqlSchemaType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])}): [{relation_model}]')
+        relationship_contents.append(f'{relationshipsHasMany[relation_model]['alias']}?: {relation_model}Entity[];')
+        model_relationships_file_cotents.append(f'{model_name}.hasMany({relation_model}, {{ as: "{relationshipsHasMany[relation_model]['alias']}", foreignKey: "{relationshipsHasMany[relation_model]['foreignKey']}", sourceKey: "{relationshipsHasMany[relation_model]['sourceKey']}" }});')
       
-      for model in relationshipsBelongsTo.keys():
-        graphql_object_relationships_cotents.append(f'{relationshipsBelongsTo[model]['alias']}: {{ type: {model}Schema }},')
-        graphql_model_relationships_cotents.append(f'{relationshipsBelongsTo[model]['alias']}: {model}')
-        relationship_contents.append(f'{relationshipsBelongsTo[model]['alias']}?: {model}Entity;')
-        model_relationships_file_cotents.append(f'{model_name}.belongsTo({model}, {{ as: "{relationshipsBelongsTo[model]['alias']}", foreignKey: "{relationshipsBelongsTo[model]['foreignKey']}", targetKey: "{relationshipsBelongsTo[model]['targetKey']}" }});')
+      for relation_model in relationshipsBelongsTo.keys():
+        graphql_object_relationships_cotents.append(f'''{relationshipsBelongsTo[relation_model]['alias']}: {{
+      type: {relation_model}Schema,
+      resolve: (source: any, args: {{ {relationshipsBelongsTo[relation_model]['targetKey']}: {getTypeScriptType(relation_model, relationshipsBelongsTo[relation_model]['targetKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
+        const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
+        return {relation_model}Repo.findOne({{
+          where: {{ {relationshipsBelongsTo[relation_model]['targetKey']}: source.{relationshipsBelongsTo[relation_model]['foreignKey']} }}
+        }});
+      }},
+    }},''')
+        graphql_model_relationships_cotents.append(f'{relationshipsBelongsTo[relation_model]['alias']}({relationshipsBelongsTo[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsBelongsTo[relation_model]['targetKey'])}): {relation_model}')
+        relationship_contents.append(f'{relationshipsBelongsTo[relation_model]['alias']}?: {relation_model}Entity;')
+        model_relationships_file_cotents.append(f'{model_name}.belongsTo({relation_model}, {{ as: "{relationshipsBelongsTo[relation_model]['alias']}", foreignKey: "{relationshipsBelongsTo[relation_model]['foreignKey']}", targetKey: "{relationshipsBelongsTo[relation_model]['targetKey']}" }});')
       
-      for model in relationshipsBelongsToMany.keys():
-        graphql_object_relationships_cotents.append(f'{relationshipsBelongsToMany[model]['alias']}: {{ type: {model}Schema }},')
-        graphql_model_relationships_cotents.append(f'{relationshipsBelongsToMany[model]['alias']}: [{model}]')
-        relationship_contents.append(f'{relationshipsBelongsToMany[model]['alias']}?: {model}Entity[];')
-        model_relationships_file_cotents.append(f'{model_name}.belongsToMany({model}, {{ as: "{relationshipsBelongsToMany[model]['alias']}", foreignKey: "{relationshipsBelongsToMany[model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[model]['targetKey']}" }});')
+      for relation_model in relationshipsBelongsToMany.keys():
+        is_through_relation = relationshipsBelongsToMany[relation_model].get('through', False)
+        
+        graphql_object_relationships_cotents.append(f'''{relationshipsBelongsToMany[relation_model]['alias']}: {{
+      type: {relation_model}Schema,
+      resolve: (source: any, args: {{ {relationshipsBelongsToMany[relation_model]['targetKey']}: {getTypeScriptType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getTypeScriptType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['targetKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
+        const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
+        return {relation_model}Repo.findAll({{ {f'''
+          include: [{{
+            model: {relationshipsBelongsToMany[relation_model]['through']},
+            where: {{ {relationshipsBelongsToMany[relation_model]['foreignKey']}: source.{relationshipsBelongsToMany[relation_model]['foreignKey']} }}
+          }}]''' 
+          if is_through_relation else f'''
+          where: {{ {relationshipsBelongsToMany[relation_model]['targetKey']}: source.{relationshipsBelongsToMany[relation_model]['foreignKey']} }}\
+          '''}
+        }});
+      }},
+    }},''')
+        graphql_model_relationships_cotents.append(f'{relationshipsBelongsToMany[relation_model]['alias']}({relationshipsBelongsToMany[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getGraphqlSchemaType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['foreignKey'])}): [{relation_model}]')
+        relationship_contents.append(f'{relationshipsBelongsToMany[relation_model]['alias']}?: {relation_model}Entity[];')
+        model_relationships_file_cotents.append(f'{model_name}.belongsToMany({relation_model}, {{ as: "{relationshipsBelongsToMany[relation_model]['alias']}", foreignKey: "{relationshipsBelongsToMany[relation_model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[relation_model]['targetKey']}" }});')
 
       graphql_model_object_contents = graphql_model_object_contents.replace("<relationships>", "\n    " + "\n    ".join(graphql_object_relationships_cotents))
       graphql_model_schema_cotents = graphql_model_schema_cotents.replace("<relationships>", "\n  " + "\n  ".join(graphql_model_relationships_cotents))
       interface_contents = interface_contents.replace("<relationships>", "\n  " + "\n  ".join(relationship_contents))
 
     
-    with open(f"generated-model-resources/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
+    with open(f"app/src/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
       f.write(graphql_model_object_contents)
       
     interface_file_contents.append(interface_contents)
     graphql_schema_file_cotents.append(graphql_model_schema_cotents)
+    drizzle_file_cotents.append(drizzle_model_contents)
 
     models_file_cotents.append(model_object_contents)
 
@@ -1346,15 +1505,35 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
 
   models_file_cotents.extend(model_relationships_file_cotents)
   joined_model_object_contents = "\n\n".join(models_file_cotents)
+  joined_drizzle_contents = "\n\n".join(drizzle_file_cotents)
 
-  with open(f"generated-model-resources/model-interfaces-converted.ts", 'w') as f:
+  graphql_root_schema_contents = f'''\
+export const rootGraphqlSchema = new GraphQLSchema({{
+
+  query: new GraphQLObjectType({{
+    name: 'RootQueryType',
+    fields: {{
+      {'\n      '.join([schema_field for schema_field in graphql_root_schema_fields])}
+    }},
+  }}),
+
+}});
+  '''
+
+  with open(f"app/src/model-interfaces-converted.ts", 'w') as f:
     f.write(joined_interface_contents)
 
-  with open(f"generated-model-resources/schema.graphql", 'w') as f:
+  with open(f"app/src/schema.graphql", 'w') as f:
     f.write(joined_graphql_schema_contents)
 
-  with open(f"generated-model-resources/models.sequelize.ts", 'w') as f:
+  with open(f"app/src/graphql/root.schema.ts", 'w') as f:
+      f.write(graphql_root_schema_contents)
+
+  with open(f"app/src/models.sequelize.ts", 'w') as f:
     f.write(joined_model_object_contents)
+
+  with open(f"app/src/schema.drizzle.ts", 'w') as f:
+    f.write(joined_drizzle_contents)
 
 
   model_types_contents = [
@@ -1365,7 +1544,7 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
     model_types_contents.append(f'  {snake_name.upper()} = "{snake_name.upper()}",\n')
   model_types_contents.append('}\n')
     
-  with open(f"generated-model-resources/model-types-converted.enum.ts", 'w') as f:
+  with open(f"app/src/model-types-converted.enum.ts", 'w') as f:
     f.write(''.join(model_types_contents))
 
   
@@ -1855,17 +2034,539 @@ export class AwsS3Service implements IAwsS3Service {
   
 
   
-  with open(f"generated-model-resources/repository.service.ts", 'w') as f:
+  with open(f"app/src/repository.service.ts", 'w') as f:
     f.write(''.join(repository_service_contents))
 
-  with open(f"generated-model-resources/openapi.json", 'w') as f:
+  with open(f"app/src/openapi.json", 'w') as f:
     f.write(json.dumps(openapi_specs, indent = 2))
 
-  with open(f"common.regex.ts", 'w') as f:
+  with open(f"app/src/common.regex.ts", 'w') as f:
     f.write(regex_contents)
 
-  with open(f"s3.aws.ts", 'w') as f:
+  with open(f"app/src/s3.aws.ts", 'w') as f:
     f.write(aws_s3_service)
+
+
+
+
+  controllers_list_contents = f'''\
+{'\n'.join([ f"import {{ {model_name}Controller }} from './resources/{camel_to_kebab(model_name)}.controller.ts';" for model_name in global_model_names ])}
+
+export const controllersList = [
+  {'\n  '.join([ f"{model_name}Controller," for model_name in global_model_names ])}
+];
+  '''
+
+  bootstrap_app_contents = f'''\
+import 'reflect-metadata';
+import fileUpload from 'express-fileupload';
+import {{
+  Application,
+  json,
+  static as staticRef,
+}} from "express";
+import {{ join as pathJoin }} from 'path';
+import {{
+  useExpressServer,
+  useContainer as useContainerRoutingControllers,
+  getMetadataArgsStorage
+}} from 'routing-controllers';
+import cookieParser from 'cookie-parser';
+import {{ Container }} from 'typedi';
+import {{ routingControllersToSpec }} from 'routing-controllers-openapi';
+import {{ serve as SwaggerUiServe, setup as SwaggerUiSetup }} from 'swagger-ui-express';
+import {{ readFileSync }} from "fs";
+import {{ validationMetadatasToSchemas }} from 'class-validator-jsonschema'
+import {{ firstValueFrom }} from "rxjs";
+
+
+
+export async function bootstrapApp(app: Application) {{
+
+  app.use('/static', staticRef(pathJoin(__dirname, 'assets', 'static')));
+
+  const SwaggerUiMiddleware = SwaggerUiSetup(JSON.parse(readFileSync(pathJoin(__dirname, 'assets', 'static', 'openapi.json')).toString()));
+  app.use('/api-docs', SwaggerUiServe, SwaggerUiMiddleware);
+  app.use('/swagger', SwaggerUiServe, (request, response, next) => {{
+    console.log(`Returning swagger ui`);
+    const specs = JSON.parse(readFileSync(pathJoin(__dirname, 'assets', 'static', 'openapi.json')).toString());
+    const middleware = SwaggerUiSetup(specs);
+    middleware(request, response, next);
+  }});
+
+  const schemas = validationMetadatasToSchemas({{
+    refPointerPrefix: '#/components/schemas/',
+  }});
+  const storage = getMetadataArgsStorage();
+  const api_spec = routingControllersToSpec(storage, {{}}, {{
+    components: {{ schemas: (schemas as any) }},
+    info: {{ title: '', version: '1.0.0' }},
+  }});
+
+  const SwaggerUiMiddleware2 = SwaggerUiSetup(api_spec);
+  app.use('/api-docs2', SwaggerUiServe, SwaggerUiMiddleware2);
+  app.use('/swagger2', SwaggerUiServe, (request, response, next) => {{
+    console.log(`Returning swagger ui`);
+    const middleware = SwaggerUiSetup(api_spec);
+    middleware(request, response, next);
+  }});
+
+  // health check
+  app.get(['/health'], HealthCheckMiddleware);
+
+  app.use(fileUpload({{
+    preserveExtension: 100,
+    uriDecodeFileNames: true,
+    safeFileNames: true,
+    useTempFiles: true,
+    tempFileDir: pathJoin(__dirname, 'tmp'),
+    debug: true,
+    logger: {{
+      log: (msg) => {{ LOGGER.info(msg); REQUESTS_FILE_LOGGER.info(msg) }}
+    }},
+    uploadTimeout: 60_000
+  }}));
+
+  app.use(cookieParser());
+
+  app.use(json());
+
+  app.use(ExpressJwtMiddleware);
+
+  app.use(RequestLoggerMiddleware);
+
+  await MountGraphqlExpress(app);
+
+  initSocketIO(app);
+
+  useExpressServer(app, {{
+    controllers: controllersList,
+    middlewares: [],
+    defaultErrorHandler: false,
+  }});
+
+  
+  // csrf token
+  app.get(['/csrf'], GetCsrfTokenMiddleware);
+
+  useContainerRoutingControllers(Container);
+  
+  // Http Request Exception
+  app.use(HttpRequestExceptionExpressHandler);
+
+}}
+
+  '''
+
+  expressjs_app_contents = '''\
+/**
+ * This is not a production server yet!
+ * This is only a minimal backend to get started.
+ */
+
+import express from 'express';
+import { bootstrapApp } from './app.init';
+
+const app = express();
+
+bootstrapApp(app).then(() => {
+  const PORT = process.env['PORT'] || 3000;
+
+  const server = app.listen(PORT, () => {
+    console.log(`Listening at http://localhost:${PORT}`);
+  });
+
+  server.on('error', (error) => {
+    console.error(error);
+  });
+});
+
+  '''
+
+
+  with open(f"app/src/app.controllers.ts", 'w') as f:
+    f.write(''.join(controllers_list_contents))
+
+  with open(f"app/src/app.init.ts", 'w') as f:
+    f.write(bootstrap_app_contents)
+
+  with open(f"app/src/app.ts", 'w') as f:
+    f.write(expressjs_app_contents)
+
+
+
+
+  with open(f"app/package.json", 'w') as f:
+    f.write('''\
+{
+  "name": "@app/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "nx": "nx",
+    "remove-project": "nx generate @nx/workspace:remove",
+    "tsc": "tsc",
+    "webpack": "webpack"
+  },
+  "private": true,
+  "devDependencies": {
+    "@angular-devkit/build-angular": "~18.1.0",
+    "@angular-devkit/core": "~18.1.0",
+    "@angular-devkit/schematics": "~18.1.0",
+    "@angular-eslint/eslint-plugin": "^18.0.1",
+    "@angular-eslint/eslint-plugin-template": "^18.0.1",
+    "@angular-eslint/template-parser": "^18.0.1",
+    "@angular/cli": "~18.1.0",
+    "@angular/compiler-cli": "~18.1.0",
+    "@angular/language-service": "~18.1.0",
+    "@expo/cli": "~0.18.13",
+    "@nx/angular": "^19.5.7",
+    "@nx/devkit": "19.5.7",
+    "@nx/esbuild": "19.8.10",
+    "@nx/eslint": "19.5.7",
+    "@nx/eslint-plugin": "^19.5.7",
+    "@nx/expo": "^19.5.7",
+    "@nx/express": "^19.5.7",
+    "@nx/jest": "19.8.10",
+    "@nx/js": "19.8.10",
+    "@nx/node": "19.8.10",
+    "@nx/playwright": "19.5.7",
+    "@nx/web": "19.5.7",
+    "@nx/webpack": "19.5.7",
+    "@nx/workspace": "19.5.7",
+    "@playwright/test": "^1.36.0",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
+    "@schematics/angular": "~18.1.0",
+    "@svgr/webpack": "^8.0.1",
+    "@swc-node/register": "~1.9.1",
+    "@swc/core": "~1.5.7",
+    "@swc/helpers": "~0.5.11",
+    "@types/bcrypt-nodejs": "^0.0.31",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/express-fileupload": "^1.5.0",
+    "@types/helmet": "^4.0.0",
+    "@types/jest": "^29.5.12",
+    "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/lodash": "^4.17.7",
+    "@types/moment": "^2.13.0",
+    "@types/multer": "^1.4.11",
+    "@types/node": "~18.16.9",
+    "@types/node-fetch": "^2.6.11",
+    "@types/sequelize": "^4.28.20",
+    "@types/socket.io": "^3.0.2",
+    "@types/swagger-ui-express": "^4.1.6",
+    "@types/winston": "^2.4.4",
+    "@types/yaml": "^1.9.7",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "@typescript-eslint/utils": "^7.16.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "dotenv": "^16.4.5",
+    "esbuild": "^0.19.2",
+    "eslint": "~8.57.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-playwright": "^0.15.3",
+    "eslint-plugin-react": "^7.37.2",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.4.1",
+    "jest-environment-node": "^29.7.0",
+    "jest-preset-angular": "~14.1.0",
+    "nodemon-webpack-plugin": "^4.8.2",
+    "nx": "19.5.7",
+    "prettier": "^2.8.8",
+    "react-refresh": "^0.10.0",
+    "routing-controllers": "^0.10.4",
+    "tailwindcss": "^3.4.9",
+    "ts-jest": "^29.1.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "10.9.1",
+    "typescript": "~5.5.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "dependencies": {
+    "@angular/animations": "~18.1.0",
+    "@angular/common": "~18.1.0",
+    "@angular/compiler": "~18.1.0",
+    "@angular/core": "~18.1.0",
+    "@angular/forms": "~18.1.0",
+    "@angular/platform-browser": "~18.1.0",
+    "@angular/platform-browser-dynamic": "~18.1.0",
+    "@angular/router": "~18.1.0",
+    "@aws-sdk/client-s3": "^3.629.0",
+    "@aws-sdk/client-ses": "^3.629.0",
+    "@gluestack-ui/nativewind-utils": "^1.0.23",
+    "@gluestack-ui/overlay": "^0.1.15",
+    "@gluestack-ui/toast": "^1.0.7",
+    "@types/redis": "^4.0.10",
+    "@vonage/server-sdk": "^3.19.2",
+    "amqplib": "^0.10.4",
+    "aws-sdk": "^2.1691.0",
+    "axios": "^1.7.3",
+    "bcrypt": "^5.1.1",
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.20.2",
+    "class-transformer": "^0.5.1",
+    "class-transformer-validator": "^0.9.1",
+    "class-validator": "^0.14.1",
+    "class-validator-jsonschema": "^5.0.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "expo": "~51.0.8",
+    "expo-server-sdk": "^3.10.0",
+    "express": "^4.18.1",
+    "express-csrf-protect": "^3.0.3",
+    "express-device": "^0.4.2",
+    "express-fileupload": "^1.5.1",
+    "express-jwt": "^8.4.1",
+    "form-data": "^4.0.0",
+    "graphql": "^16.9.0",
+    "graphql-http": "^1.22.1",
+    "graphql-scalars": "^1.23.0",
+    "handlebars": "^4.7.8",
+    "helmet": "^7.1.0",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "multer": "^1.4.5-lts.1",
+    "nexmo": "^2.9.1",
+    "node-fetch": "^3.3.2",
+    "peer": "^1.0.2",
+    "pg": "^8.12.0",
+    "pg-hstore": "^2.3.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.74.1",
+    "react-native-svg": "^15.8.0",
+    "redis": "^4.7.0",
+    "reflect-metadata": "^0.2.2",
+    "routing-controllers-openapi": "^4.0.0",
+    "ruru": "^2.0.0-beta.13",
+    "rxjs": "~7.8.0",
+    "sequelize": "^6.37.3",
+    "sequelize-typescript": "^2.1.6",
+    "socket.io": "^4.8.0",
+    "socket.io-stream": "^0.9.1",
+    "stripe": "^16.7.0",
+    "swagger-ui-express": "^5.0.1",
+    "triple-beam": "^1.4.1",
+    "tslib": "^2.3.0",
+    "typedi": "^0.10.0",
+    "uuid": "^10.0.0",
+    "validator": "^13.12.0",
+    "winston": "^3.14.1",
+    "winston-daily-rotate-file": "^5.0.0",
+    "yaml": "^2.5.0",
+    "zone.js": "~0.14.3"
+  }
+}
+''')
+    
+  with open(f"app/docker-compose.yml", 'w') as f:
+    f.write('''
+version: "3.8"
+
+networks:
+  # https://splunk.github.io/docker-splunk/EXAMPLES.html#create-standalone-and-universal-forwarder
+  splunknet:
+    driver: bridge
+    attachable: true
+
+volumes:
+
+  # https://splunk.github.io/docker-splunk/STORAGE_OPTIONS.html
+  # https://docs.docker.com/config/containers/logging/splunk/
+
+  app-db-vol:
+    driver: local
+
+  file-server-vol:
+    driver: local
+
+  localstack-vol:
+    driver: local
+
+  localstack_pods:
+    driver: local
+
+  localstack-persistence-vol:
+    driver: local
+
+  opt-splunk-etc:
+    driver: local
+
+  opt-splunk-var:
+    driver: local
+
+  redis-cache-vol:
+    driver: local
+
+services:
+
+  # uf1:
+  #   networks:
+  #     splunknet:
+  #       aliases:
+  #         - uf1
+  #   image: ${UF_IMAGE:-splunk/universalforwarder:latest}
+  #   hostname: uf1
+  #   container_name: uf1
+  #   environment:
+  #     - SPLUNK_START_ARGS=--accept-license
+  #     - SPLUNK_STANDALONE_URL=so1
+  #     - SPLUNK_ADD=udp 1514,monitor /var/log/*
+  #     - SPLUNK_PASSWORD=password
+  #   ports:
+  #     - 8089
+
+  # so1:
+  #   networks:
+  #     splunknet:
+  #       aliases:
+  #         - so1
+  #   image: ${SPLUNK_IMAGE:-splunk/splunk:latest}
+  #   hostname: so1
+  #   container_name: so1
+  #   environment:
+  #     - SPLUNK_START_ARGS=--accept-license
+  #     - SPLUNK_STANDALONE_URL=so1
+  #     - SPLUNK_PASSWORD=password
+  #     - SPLUNK_LICENSE_URI=Free
+  #   ports:
+  #     - 8000
+  #     - 8089
+  #   volumes:
+  #     - opt-splunk-etc:/opt/splunk/etc
+  #     - opt-splunk-var:/opt/splunk/var
+
+  # AWS mock - https://hub.docker.com/r/localstack/localstack
+  # https://docs.localstack.cloud/user-guide/integrations/sdks/javascript/
+  # aws-localstack:
+  #   image: localstack/localstack
+  #   ports:
+  #     - "0.0.0.0:4566:4566"            # LocalStack Gateway
+  #     - "0.0.0.0:4510-4559:4510-4559"  # external services port range
+  #   environment:
+  #     # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+  #     DEBUG: ${DEBUG:-1}
+  #     AWS_DEFAULT_REGION: us-east-1
+  #   volumes:
+  #     # - "localstack-vol:/var/lib/localstack"
+  #     # - "/var/run/docker.sock:/var/run/docker.sock"
+
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ./boot.sh:/etc/localstack/init/boot.d/boot.sh
+  #     - ./ready.sh:/etc/localstack/init/ready.d/ready.sh
+  #     - ./shutdown.sh:/etc/localstack/init/shutdown.d/shutdown.sh
+  #     - localstack_pods:/pods
+
+  # https://github.com/localstack/localstack/issues/6281
+  # https://hub.docker.com/r/gresau/localstack-persist
+  localstack-persistence:
+    image: gresau/localstack-persist:3 # instead of localstack/localstack:3
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-persistence-vol:/persisted-data
+
+  # Databases
+
+  app-db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - '5431:5432'
+    volumes: 
+      - app-db-vol:/var/lib/postgresql/data
+
+  # Cache
+
+  redis-cache:
+    image: redis:latest
+    hostname: redis-cache
+    environment:
+      PASSWORD: password
+    command: redis-server --requirepass password
+    deploy:
+      replicas: 1
+    ports:
+      - '6378:6379'
+    volumes:
+      - redis-cache-vol:/data
+
+
+  # File-Server - https://hub.docker.com/r/flaviostutz/simple-file-server
+  # simple-file-server:
+  #   build: .
+  #   image: flaviostutz/simple-file-server
+  #   ports:
+  #     - "4000:4000"
+  #   environment:
+  #     - WRITE_SHARED_KEY=
+  #     - READ_SHARED_KEY=
+  #     - LOCATION_BASE_URL=http://localhost:4000
+  #     - LOG_LEVEL=debug
+  #     - CHOKIDAR_USEPOLLING=true
+  #   volumes:
+  #     - file-server-vol:/data
+
+
+  # Servers
+
+  # app-server:
+  #   build:
+  #     context: .
+  #     dockerfile: dockerfiles/expressjs.Dockerfile
+  #     args:
+  #       APP_NAME: app-server-expressjs
+  #       SHARED_STORAGE_VOL_PATH: /app/shared-files
+  #       LOGS_PATH: /app/logs
+  #   command: npm run nx serve app-server
+  #   deploy:
+  #     replicas: 1
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     APP_ENV: LOCAL
+  #     APP_MACHINE_NAME: APP_SERVER_EXPRESSJS
+  #     APP_DISPLAY_NAME: "App Server ExpressJS"
+  #     LOGS_PATH: /app/logs
+  #     COMPONENT: app-server-expressjs
+  #     SHARED_STORAGE_VOL_PATH: /app/shared-files
+  #     PORT: 4000
+  #     JWT_SECRET: "0123456789"
+  #     DATABASE_URL: postgres://postgres:postgres_password@app-db:5432
+  #     CORS_WHITELIST_ORIGINS: http://localhost:4200,http://localhost:7600
+  #     REDIS_URL: redis://default:password@redis-cache:6379
+
+  #     PLATFORM_AWS_S3_REGION: us-east-1
+  #     PLATFORM_AWS_S3_BUCKET: public-assets
+  #     PLATFORM_AWS_S3_BUCKET_SERVE_ORIGIN: http://localhost:4566/public-assets
+  #     PLATFORM_AWS_S3_ORIGIN: http://s3.us-east-1.localhost.localstack.cloud:4566
+  #     PLATFORM_AWS_S3_ENDPOINT: http://localstack-persistence:4566
+
+  #     SPLUNK_TOKEN: ""
+  #     SPLUNK_HOST: so1
+
+  #   depends_on:
+  #     - app-db
+  #     # - aws-localstack
+  #     - localstack-persistence
+  #   ports:
+  #     - '4000:4000'
+  #   volumes:
+  #     - /app/node_modules
+  #     - './src:/app/src'
+  #     - './app-logs:/app/logs'
+
+''')
   
 
 
