@@ -76,7 +76,7 @@ model_config_to_typescript_type_map = {
 }
 
 
-Path('src').mkdir(parents = True, exist_ok = True)
+Path('app/src').mkdir(parents = True, exist_ok = True)
 
 
 
@@ -498,22 +498,7 @@ def create_resource(
   singular_caps = singular.capitalize()
   plural_caps = plural.capitalize()
   
-  # print('names: ', {
-  #   "model_name": model_name,
-  #   "kebob_name": kebob_name,
-  #   "kebob_name_plural": kebob_name_plural,
-  #   "snake_name": snake_name,
-  #   "snake_name_plural": snake_name_plural,
-  #   "model_name_plural": model_name_plural,
-  #   "model_var_name": model_var_name,
-  #   "singular": singular,
-  #   "plural": plural,
-  #   "singular_caps": singular_caps,
-  #   "plural_caps": plural_caps,
-  # })
-
-  # base_path = f"src/apps/app-server/src/resources{plural}"
-  base_path = 'src/resources'
+  base_path = 'app/src/resources'
 
 
 
@@ -1126,29 +1111,29 @@ export class Search{model_name}Dto implements Partial<{model_name}Entity> {{
 
   # add copy to src for reference
   
-  Path(f"src/resources/{kebob_name_plural}").mkdir(parents = True, exist_ok = True)
-  Path(f"src/resources/{kebob_name_plural}/dto").mkdir(parents = True, exist_ok = True)
-  Path(f"src/resources/{kebob_name_plural}/dto/validations").mkdir(parents = True, exist_ok = True)
+  Path(f"app/src/resources/{kebob_name_plural}").mkdir(parents = True, exist_ok = True)
+  Path(f"app/src/resources/{kebob_name_plural}/dto").mkdir(parents = True, exist_ok = True)
+  Path(f"app/src/resources/{kebob_name_plural}/dto/validations").mkdir(parents = True, exist_ok = True)
 
-  with open(Path(f"src/resources/{kebob_name_plural}/{kebob_name_plural}.controller.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.controller.ts"), 'w') as f:
     f.write(controller_contents)
   
-  with open(Path(f"src/resources/{kebob_name_plural}/{kebob_name_plural}.guard.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.guard.ts"), 'w') as f:
     f.write(guard_contents)
   
-  with open(Path(f"src/resources/{kebob_name_plural}/{kebob_name_plural}.service.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.service.ts"), 'w') as f:
     f.write(service_contents)
   
-  with open(Path(f"src/resources/{kebob_name_plural}/{kebob_name_plural}.repository.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.repository.ts"), 'w') as f:
     f.write(repository_contents)
   
-  with open(Path(f"src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.create.dto.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.create.dto.ts"), 'w') as f:
     f.write(create_dto_contents)
   
-  with open(Path(f"src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.update.dto.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.update.dto.ts"), 'w') as f:
     f.write(update_dto_contents)
   
-  with open(Path(f"src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.search.dto.ts"), 'w') as f:
+  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.search.dto.ts"), 'w') as f:
     f.write(search_dto_contents)
   
 
@@ -1280,7 +1265,7 @@ def convert_models_to_resources():
   
   global_model_names = model_names
   
-  Path(f"src/graphql/schemas").mkdir(parents = True, exist_ok = True)
+  Path(f"app/src/graphql/schemas").mkdir(parents = True, exist_ok = True)
 
   
   
@@ -1486,7 +1471,7 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
       interface_contents = interface_contents.replace("<relationships>", "\n  " + "\n  ".join(relationship_contents))
 
     
-    with open(f"src/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
+    with open(f"app/src/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
       f.write(graphql_model_object_contents)
       
     interface_file_contents.append(interface_contents)
@@ -1535,19 +1520,19 @@ export const rootGraphqlSchema = new GraphQLSchema({{
 }});
   '''
 
-  with open(f"src/model-interfaces-converted.ts", 'w') as f:
+  with open(f"app/src/model-interfaces-converted.ts", 'w') as f:
     f.write(joined_interface_contents)
 
-  with open(f"src/schema.graphql", 'w') as f:
+  with open(f"app/src/schema.graphql", 'w') as f:
     f.write(joined_graphql_schema_contents)
 
-  with open(f"src/graphql/root.schema.ts", 'w') as f:
+  with open(f"app/src/graphql/root.schema.ts", 'w') as f:
       f.write(graphql_root_schema_contents)
 
-  with open(f"src/models.sequelize.ts", 'w') as f:
+  with open(f"app/src/models.sequelize.ts", 'w') as f:
     f.write(joined_model_object_contents)
 
-  with open(f"src/schema.drizzle.ts", 'w') as f:
+  with open(f"app/src/schema.drizzle.ts", 'w') as f:
     f.write(joined_drizzle_contents)
 
 
@@ -1559,7 +1544,7 @@ export const rootGraphqlSchema = new GraphQLSchema({{
     model_types_contents.append(f'  {snake_name.upper()} = "{snake_name.upper()}",\n')
   model_types_contents.append('}\n')
     
-  with open(f"src/model-types-converted.enum.ts", 'w') as f:
+  with open(f"app/src/model-types-converted.enum.ts", 'w') as f:
     f.write(''.join(model_types_contents))
 
   
@@ -2049,16 +2034,16 @@ export class AwsS3Service implements IAwsS3Service {
   
 
   
-  with open(f"src/repository.service.ts", 'w') as f:
+  with open(f"app/src/repository.service.ts", 'w') as f:
     f.write(''.join(repository_service_contents))
 
-  with open(f"src/openapi.json", 'w') as f:
+  with open(f"app/src/openapi.json", 'w') as f:
     f.write(json.dumps(openapi_specs, indent = 2))
 
-  with open(f"src/common.regex.ts", 'w') as f:
+  with open(f"app/src/common.regex.ts", 'w') as f:
     f.write(regex_contents)
 
-  with open(f"src/s3.aws.ts", 'w') as f:
+  with open(f"app/src/s3.aws.ts", 'w') as f:
     f.write(aws_s3_service)
 
 
@@ -2199,14 +2184,389 @@ bootstrapApp(app).then(() => {
   '''
 
 
-  with open(f"src/app.controllers.ts", 'w') as f:
+  with open(f"app/src/app.controllers.ts", 'w') as f:
     f.write(''.join(controllers_list_contents))
 
-  with open(f"src/app.init.ts", 'w') as f:
+  with open(f"app/src/app.init.ts", 'w') as f:
     f.write(bootstrap_app_contents)
 
-  with open(f"src/app.ts", 'w') as f:
+  with open(f"app/src/app.ts", 'w') as f:
     f.write(expressjs_app_contents)
+
+
+
+
+  with open(f"app/package.json", 'w') as f:
+    f.write('''\
+{
+  "name": "@app/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "nx": "nx",
+    "remove-project": "nx generate @nx/workspace:remove",
+    "tsc": "tsc",
+    "webpack": "webpack"
+  },
+  "private": true,
+  "devDependencies": {
+    "@angular-devkit/build-angular": "~18.1.0",
+    "@angular-devkit/core": "~18.1.0",
+    "@angular-devkit/schematics": "~18.1.0",
+    "@angular-eslint/eslint-plugin": "^18.0.1",
+    "@angular-eslint/eslint-plugin-template": "^18.0.1",
+    "@angular-eslint/template-parser": "^18.0.1",
+    "@angular/cli": "~18.1.0",
+    "@angular/compiler-cli": "~18.1.0",
+    "@angular/language-service": "~18.1.0",
+    "@expo/cli": "~0.18.13",
+    "@nx/angular": "^19.5.7",
+    "@nx/devkit": "19.5.7",
+    "@nx/esbuild": "19.8.10",
+    "@nx/eslint": "19.5.7",
+    "@nx/eslint-plugin": "^19.5.7",
+    "@nx/expo": "^19.5.7",
+    "@nx/express": "^19.5.7",
+    "@nx/jest": "19.8.10",
+    "@nx/js": "19.8.10",
+    "@nx/node": "19.8.10",
+    "@nx/playwright": "19.5.7",
+    "@nx/web": "19.5.7",
+    "@nx/webpack": "19.5.7",
+    "@nx/workspace": "19.5.7",
+    "@playwright/test": "^1.36.0",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.7",
+    "@schematics/angular": "~18.1.0",
+    "@svgr/webpack": "^8.0.1",
+    "@swc-node/register": "~1.9.1",
+    "@swc/core": "~1.5.7",
+    "@swc/helpers": "~0.5.11",
+    "@types/bcrypt-nodejs": "^0.0.31",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/express-fileupload": "^1.5.0",
+    "@types/helmet": "^4.0.0",
+    "@types/jest": "^29.5.12",
+    "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/lodash": "^4.17.7",
+    "@types/moment": "^2.13.0",
+    "@types/multer": "^1.4.11",
+    "@types/node": "~18.16.9",
+    "@types/node-fetch": "^2.6.11",
+    "@types/sequelize": "^4.28.20",
+    "@types/socket.io": "^3.0.2",
+    "@types/swagger-ui-express": "^4.1.6",
+    "@types/winston": "^2.4.4",
+    "@types/yaml": "^1.9.7",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "@typescript-eslint/utils": "^7.16.0",
+    "copy-webpack-plugin": "^12.0.2",
+    "dotenv": "^16.4.5",
+    "esbuild": "^0.19.2",
+    "eslint": "~8.57.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-playwright": "^0.15.3",
+    "eslint-plugin-react": "^7.37.2",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.4.1",
+    "jest-environment-node": "^29.7.0",
+    "jest-preset-angular": "~14.1.0",
+    "nodemon-webpack-plugin": "^4.8.2",
+    "nx": "19.5.7",
+    "prettier": "^2.8.8",
+    "react-refresh": "^0.10.0",
+    "routing-controllers": "^0.10.4",
+    "tailwindcss": "^3.4.9",
+    "ts-jest": "^29.1.0",
+    "ts-loader": "^9.5.1",
+    "ts-node": "10.9.1",
+    "typescript": "~5.5.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
+  },
+  "dependencies": {
+    "@angular/animations": "~18.1.0",
+    "@angular/common": "~18.1.0",
+    "@angular/compiler": "~18.1.0",
+    "@angular/core": "~18.1.0",
+    "@angular/forms": "~18.1.0",
+    "@angular/platform-browser": "~18.1.0",
+    "@angular/platform-browser-dynamic": "~18.1.0",
+    "@angular/router": "~18.1.0",
+    "@aws-sdk/client-s3": "^3.629.0",
+    "@aws-sdk/client-ses": "^3.629.0",
+    "@gluestack-ui/nativewind-utils": "^1.0.23",
+    "@gluestack-ui/overlay": "^0.1.15",
+    "@gluestack-ui/toast": "^1.0.7",
+    "@types/redis": "^4.0.10",
+    "@vonage/server-sdk": "^3.19.2",
+    "amqplib": "^0.10.4",
+    "aws-sdk": "^2.1691.0",
+    "axios": "^1.7.3",
+    "bcrypt": "^5.1.1",
+    "bcrypt-nodejs": "^0.0.3",
+    "body-parser": "^1.20.2",
+    "class-transformer": "^0.5.1",
+    "class-transformer-validator": "^0.9.1",
+    "class-validator": "^0.14.1",
+    "class-validator-jsonschema": "^5.0.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "expo": "~51.0.8",
+    "expo-server-sdk": "^3.10.0",
+    "express": "^4.18.1",
+    "express-csrf-protect": "^3.0.3",
+    "express-device": "^0.4.2",
+    "express-fileupload": "^1.5.1",
+    "express-jwt": "^8.4.1",
+    "form-data": "^4.0.0",
+    "graphql": "^16.9.0",
+    "graphql-http": "^1.22.1",
+    "graphql-scalars": "^1.23.0",
+    "handlebars": "^4.7.8",
+    "helmet": "^7.1.0",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "moment": "^2.30.1",
+    "multer": "^1.4.5-lts.1",
+    "nexmo": "^2.9.1",
+    "node-fetch": "^3.3.2",
+    "peer": "^1.0.2",
+    "pg": "^8.12.0",
+    "pg-hstore": "^2.3.4",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.74.1",
+    "react-native-svg": "^15.8.0",
+    "redis": "^4.7.0",
+    "reflect-metadata": "^0.2.2",
+    "routing-controllers-openapi": "^4.0.0",
+    "ruru": "^2.0.0-beta.13",
+    "rxjs": "~7.8.0",
+    "sequelize": "^6.37.3",
+    "sequelize-typescript": "^2.1.6",
+    "socket.io": "^4.8.0",
+    "socket.io-stream": "^0.9.1",
+    "stripe": "^16.7.0",
+    "swagger-ui-express": "^5.0.1",
+    "triple-beam": "^1.4.1",
+    "tslib": "^2.3.0",
+    "typedi": "^0.10.0",
+    "uuid": "^10.0.0",
+    "validator": "^13.12.0",
+    "winston": "^3.14.1",
+    "winston-daily-rotate-file": "^5.0.0",
+    "yaml": "^2.5.0",
+    "zone.js": "~0.14.3"
+  }
+}
+''')
+    
+  with open(f"app/docker-compose.yml", 'w') as f:
+    f.write('''
+version: "3.8"
+
+networks:
+  # https://splunk.github.io/docker-splunk/EXAMPLES.html#create-standalone-and-universal-forwarder
+  splunknet:
+    driver: bridge
+    attachable: true
+
+volumes:
+
+  # https://splunk.github.io/docker-splunk/STORAGE_OPTIONS.html
+  # https://docs.docker.com/config/containers/logging/splunk/
+
+  app-db-vol:
+    driver: local
+
+  file-server-vol:
+    driver: local
+
+  localstack-vol:
+    driver: local
+
+  localstack_pods:
+    driver: local
+
+  localstack-persistence-vol:
+    driver: local
+
+  opt-splunk-etc:
+    driver: local
+
+  opt-splunk-var:
+    driver: local
+
+  redis-cache-vol:
+    driver: local
+
+services:
+
+  # uf1:
+  #   networks:
+  #     splunknet:
+  #       aliases:
+  #         - uf1
+  #   image: ${UF_IMAGE:-splunk/universalforwarder:latest}
+  #   hostname: uf1
+  #   container_name: uf1
+  #   environment:
+  #     - SPLUNK_START_ARGS=--accept-license
+  #     - SPLUNK_STANDALONE_URL=so1
+  #     - SPLUNK_ADD=udp 1514,monitor /var/log/*
+  #     - SPLUNK_PASSWORD=password
+  #   ports:
+  #     - 8089
+
+  # so1:
+  #   networks:
+  #     splunknet:
+  #       aliases:
+  #         - so1
+  #   image: ${SPLUNK_IMAGE:-splunk/splunk:latest}
+  #   hostname: so1
+  #   container_name: so1
+  #   environment:
+  #     - SPLUNK_START_ARGS=--accept-license
+  #     - SPLUNK_STANDALONE_URL=so1
+  #     - SPLUNK_PASSWORD=password
+  #     - SPLUNK_LICENSE_URI=Free
+  #   ports:
+  #     - 8000
+  #     - 8089
+  #   volumes:
+  #     - opt-splunk-etc:/opt/splunk/etc
+  #     - opt-splunk-var:/opt/splunk/var
+
+  # AWS mock - https://hub.docker.com/r/localstack/localstack
+  # https://docs.localstack.cloud/user-guide/integrations/sdks/javascript/
+  # aws-localstack:
+  #   image: localstack/localstack
+  #   ports:
+  #     - "0.0.0.0:4566:4566"            # LocalStack Gateway
+  #     - "0.0.0.0:4510-4559:4510-4559"  # external services port range
+  #   environment:
+  #     # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
+  #     DEBUG: ${DEBUG:-1}
+  #     AWS_DEFAULT_REGION: us-east-1
+  #   volumes:
+  #     # - "localstack-vol:/var/lib/localstack"
+  #     # - "/var/run/docker.sock:/var/run/docker.sock"
+
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - ./boot.sh:/etc/localstack/init/boot.d/boot.sh
+  #     - ./ready.sh:/etc/localstack/init/ready.d/ready.sh
+  #     - ./shutdown.sh:/etc/localstack/init/shutdown.d/shutdown.sh
+  #     - localstack_pods:/pods
+
+  # https://github.com/localstack/localstack/issues/6281
+  # https://hub.docker.com/r/gresau/localstack-persist
+  localstack-persistence:
+    image: gresau/localstack-persist:3 # instead of localstack/localstack:3
+    ports:
+      - "4566:4566"
+    volumes:
+      - localstack-persistence-vol:/persisted-data
+
+  # Databases
+
+  app-db:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - '5431:5432'
+    volumes: 
+      - app-db-vol:/var/lib/postgresql/data
+
+  # Cache
+
+  redis-cache:
+    image: redis:latest
+    hostname: redis-cache
+    environment:
+      PASSWORD: password
+    command: redis-server --requirepass password
+    deploy:
+      replicas: 1
+    ports:
+      - '6378:6379'
+    volumes:
+      - redis-cache-vol:/data
+
+
+  # File-Server - https://hub.docker.com/r/flaviostutz/simple-file-server
+  # simple-file-server:
+  #   build: .
+  #   image: flaviostutz/simple-file-server
+  #   ports:
+  #     - "4000:4000"
+  #   environment:
+  #     - WRITE_SHARED_KEY=
+  #     - READ_SHARED_KEY=
+  #     - LOCATION_BASE_URL=http://localhost:4000
+  #     - LOG_LEVEL=debug
+  #     - CHOKIDAR_USEPOLLING=true
+  #   volumes:
+  #     - file-server-vol:/data
+
+
+  # Servers
+
+  # app-server:
+  #   build:
+  #     context: .
+  #     dockerfile: dockerfiles/expressjs.Dockerfile
+  #     args:
+  #       APP_NAME: app-server-expressjs
+  #       SHARED_STORAGE_VOL_PATH: /app/shared-files
+  #       LOGS_PATH: /app/logs
+  #   command: npm run nx serve app-server
+  #   deploy:
+  #     replicas: 1
+  #   env_file:
+  #     - .env
+  #   environment:
+  #     APP_ENV: LOCAL
+  #     APP_MACHINE_NAME: APP_SERVER_EXPRESSJS
+  #     APP_DISPLAY_NAME: "App Server ExpressJS"
+  #     LOGS_PATH: /app/logs
+  #     COMPONENT: app-server-expressjs
+  #     SHARED_STORAGE_VOL_PATH: /app/shared-files
+  #     PORT: 4000
+  #     JWT_SECRET: "0123456789"
+  #     DATABASE_URL: postgres://postgres:postgres_password@app-db:5432
+  #     CORS_WHITELIST_ORIGINS: http://localhost:4200,http://localhost:7600
+  #     REDIS_URL: redis://default:password@redis-cache:6379
+
+  #     PLATFORM_AWS_S3_REGION: us-east-1
+  #     PLATFORM_AWS_S3_BUCKET: public-assets
+  #     PLATFORM_AWS_S3_BUCKET_SERVE_ORIGIN: http://localhost:4566/public-assets
+  #     PLATFORM_AWS_S3_ORIGIN: http://s3.us-east-1.localhost.localstack.cloud:4566
+  #     PLATFORM_AWS_S3_ENDPOINT: http://localstack-persistence:4566
+
+  #     SPLUNK_TOKEN: ""
+  #     SPLUNK_HOST: so1
+
+  #   depends_on:
+  #     - app-db
+  #     # - aws-localstack
+  #     - localstack-persistence
+  #   ports:
+  #     - '4000:4000'
+  #   volumes:
+  #     - /app/node_modules
+  #     - './src:/app/src'
+  #     - './app-logs:/app/logs'
+
+''')
   
 
 
