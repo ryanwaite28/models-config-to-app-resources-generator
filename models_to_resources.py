@@ -76,7 +76,7 @@ model_config_to_typescript_type_map = {
 }
 
 
-Path('generated-model-resources').mkdir(parents = True, exist_ok = True)
+Path('src').mkdir(parents = True, exist_ok = True)
 
 
 
@@ -159,6 +159,8 @@ def format_dto_fields_for_query(f: str) -> str:
   
   
 user_owner_field_by_model = {}
+
+global_model_names: list[str] = []
 
 field_names_by_model: dict[list[str]] = {}
 field_configs_by_model: dict[dict] = {}
@@ -511,7 +513,7 @@ def create_resource(
   # })
 
   # base_path = f"src/apps/app-server/src/resources{plural}"
-  base_path = 'generated-model-resources/resources'
+  base_path = 'src/resources'
 
 
 
@@ -1122,31 +1124,31 @@ export class Search{model_name}Dto implements Partial<{model_name}Entity> {{
       f.write(search_dto_contents)
 
 
-  # add copy to generated-model-resources for reference
+  # add copy to src for reference
   
-  Path(f"generated-model-resources/resources/{kebob_name_plural}").mkdir(parents = True, exist_ok = True)
-  Path(f"generated-model-resources/resources/{kebob_name_plural}/dto").mkdir(parents = True, exist_ok = True)
-  Path(f"generated-model-resources/resources/{kebob_name_plural}/dto/validations").mkdir(parents = True, exist_ok = True)
+  Path(f"src/resources/{kebob_name_plural}").mkdir(parents = True, exist_ok = True)
+  Path(f"src/resources/{kebob_name_plural}/dto").mkdir(parents = True, exist_ok = True)
+  Path(f"src/resources/{kebob_name_plural}/dto/validations").mkdir(parents = True, exist_ok = True)
 
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/{kebob_name_plural}.controller.ts"), 'w') as f:
+  with open(Path(f"src/resources/{kebob_name_plural}/{kebob_name_plural}.controller.ts"), 'w') as f:
     f.write(controller_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/{kebob_name_plural}.guard.ts"), 'w') as f:
+  with open(Path(f"src/resources/{kebob_name_plural}/{kebob_name_plural}.guard.ts"), 'w') as f:
     f.write(guard_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/{kebob_name_plural}.service.ts"), 'w') as f:
+  with open(Path(f"src/resources/{kebob_name_plural}/{kebob_name_plural}.service.ts"), 'w') as f:
     f.write(service_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/{kebob_name_plural}.repository.ts"), 'w') as f:
+  with open(Path(f"src/resources/{kebob_name_plural}/{kebob_name_plural}.repository.ts"), 'w') as f:
     f.write(repository_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/dto/{kebob_name_plural}.create.dto.ts"), 'w') as f:
+  with open(Path(f"src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.create.dto.ts"), 'w') as f:
     f.write(create_dto_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/dto/{kebob_name_plural}.update.dto.ts"), 'w') as f:
+  with open(Path(f"src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.update.dto.ts"), 'w') as f:
     f.write(update_dto_contents)
   
-  with open(Path(f"generated-model-resources/resources/{kebob_name_plural}/dto/{kebob_name_plural}.search.dto.ts"), 'w') as f:
+  with open(Path(f"src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.search.dto.ts"), 'w') as f:
     f.write(search_dto_contents)
   
 
@@ -1208,6 +1210,7 @@ def convert_models_to_resources():
   global field_definitions_by_model
   global field_names_by_model
   global field_configs_by_model
+  global global_model_names
 
 
 
@@ -1275,7 +1278,9 @@ def convert_models_to_resources():
     print("No models found in config.")
     return
   
-  Path(f"generated-model-resources/graphql/schemas").mkdir(parents = True, exist_ok = True)
+  global_model_names = model_names
+  
+  Path(f"src/graphql/schemas").mkdir(parents = True, exist_ok = True)
 
   
   
@@ -1481,7 +1486,7 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
       interface_contents = interface_contents.replace("<relationships>", "\n  " + "\n  ".join(relationship_contents))
 
     
-    with open(f"generated-model-resources/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
+    with open(f"src/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
       f.write(graphql_model_object_contents)
       
     interface_file_contents.append(interface_contents)
@@ -1530,19 +1535,19 @@ export const rootGraphqlSchema = new GraphQLSchema({{
 }});
   '''
 
-  with open(f"generated-model-resources/model-interfaces-converted.ts", 'w') as f:
+  with open(f"src/model-interfaces-converted.ts", 'w') as f:
     f.write(joined_interface_contents)
 
-  with open(f"generated-model-resources/schema.graphql", 'w') as f:
+  with open(f"src/schema.graphql", 'w') as f:
     f.write(joined_graphql_schema_contents)
 
-  with open(f"generated-model-resources/graphql/root.schema.ts", 'w') as f:
+  with open(f"src/graphql/root.schema.ts", 'w') as f:
       f.write(graphql_root_schema_contents)
 
-  with open(f"generated-model-resources/models.sequelize.ts", 'w') as f:
+  with open(f"src/models.sequelize.ts", 'w') as f:
     f.write(joined_model_object_contents)
 
-  with open(f"generated-model-resources/schema.drizzle.ts", 'w') as f:
+  with open(f"src/schema.drizzle.ts", 'w') as f:
     f.write(joined_drizzle_contents)
 
 
@@ -1554,7 +1559,7 @@ export const rootGraphqlSchema = new GraphQLSchema({{
     model_types_contents.append(f'  {snake_name.upper()} = "{snake_name.upper()}",\n')
   model_types_contents.append('}\n')
     
-  with open(f"generated-model-resources/model-types-converted.enum.ts", 'w') as f:
+  with open(f"src/model-types-converted.enum.ts", 'w') as f:
     f.write(''.join(model_types_contents))
 
   
@@ -2044,17 +2049,164 @@ export class AwsS3Service implements IAwsS3Service {
   
 
   
-  with open(f"generated-model-resources/repository.service.ts", 'w') as f:
+  with open(f"src/repository.service.ts", 'w') as f:
     f.write(''.join(repository_service_contents))
 
-  with open(f"generated-model-resources/openapi.json", 'w') as f:
+  with open(f"src/openapi.json", 'w') as f:
     f.write(json.dumps(openapi_specs, indent = 2))
 
-  with open(f"common.regex.ts", 'w') as f:
+  with open(f"src/common.regex.ts", 'w') as f:
     f.write(regex_contents)
 
-  with open(f"s3.aws.ts", 'w') as f:
+  with open(f"src/s3.aws.ts", 'w') as f:
     f.write(aws_s3_service)
+
+
+
+
+  controllers_list_contents = f'''\
+{'\n'.join([ f"import {{ {model_name}Controller }} from './resources/{camel_to_kebab(model_name)}.controller.ts';" for model_name in global_model_names ])}
+
+export const controllersList = [
+  {'\n  '.join([ f"{model_name}Controller," for model_name in global_model_names ])}
+];
+  '''
+
+  bootstrap_app_contents = f'''\
+import 'reflect-metadata';
+import fileUpload from 'express-fileupload';
+import {{
+  Application,
+  json,
+  static as staticRef,
+}} from "express";
+import {{ join as pathJoin }} from 'path';
+import {{
+  useExpressServer,
+  useContainer as useContainerRoutingControllers,
+  getMetadataArgsStorage
+}} from 'routing-controllers';
+import cookieParser from 'cookie-parser';
+import {{ Container }} from 'typedi';
+import {{ routingControllersToSpec }} from 'routing-controllers-openapi';
+import {{ serve as SwaggerUiServe, setup as SwaggerUiSetup }} from 'swagger-ui-express';
+import {{ readFileSync }} from "fs";
+import {{ validationMetadatasToSchemas }} from 'class-validator-jsonschema'
+import {{ firstValueFrom }} from "rxjs";
+
+
+
+export async function bootstrapApp(app: Application) {{
+
+  app.use('/static', staticRef(pathJoin(__dirname, 'assets', 'static')));
+
+  const SwaggerUiMiddleware = SwaggerUiSetup(JSON.parse(readFileSync(pathJoin(__dirname, 'assets', 'static', 'openapi.json')).toString()));
+  app.use('/api-docs', SwaggerUiServe, SwaggerUiMiddleware);
+  app.use('/swagger', SwaggerUiServe, (request, response, next) => {{
+    console.log(`Returning swagger ui`);
+    const specs = JSON.parse(readFileSync(pathJoin(__dirname, 'assets', 'static', 'openapi.json')).toString());
+    const middleware = SwaggerUiSetup(specs);
+    middleware(request, response, next);
+  }});
+
+  const schemas = validationMetadatasToSchemas({{
+    refPointerPrefix: '#/components/schemas/',
+  }});
+  const storage = getMetadataArgsStorage();
+  const api_spec = routingControllersToSpec(storage, {{}}, {{
+    components: {{ schemas: (schemas as any) }},
+    info: {{ title: '', version: '1.0.0' }},
+  }});
+
+  const SwaggerUiMiddleware2 = SwaggerUiSetup(api_spec);
+  app.use('/api-docs2', SwaggerUiServe, SwaggerUiMiddleware2);
+  app.use('/swagger2', SwaggerUiServe, (request, response, next) => {{
+    console.log(`Returning swagger ui`);
+    const middleware = SwaggerUiSetup(api_spec);
+    middleware(request, response, next);
+  }});
+
+  // health check
+  app.get(['/health'], HealthCheckMiddleware);
+
+  app.use(fileUpload({{
+    preserveExtension: 100,
+    uriDecodeFileNames: true,
+    safeFileNames: true,
+    useTempFiles: true,
+    tempFileDir: pathJoin(__dirname, 'tmp'),
+    debug: true,
+    logger: {{
+      log: (msg) => {{ LOGGER.info(msg); REQUESTS_FILE_LOGGER.info(msg) }}
+    }},
+    uploadTimeout: 60_000
+  }}));
+
+  app.use(cookieParser());
+
+  app.use(json());
+
+  app.use(ExpressJwtMiddleware);
+
+  app.use(RequestLoggerMiddleware);
+
+  await MountGraphqlExpress(app);
+
+  initSocketIO(app);
+
+  useExpressServer(app, {{
+    controllers: controllersList,
+    middlewares: [],
+    defaultErrorHandler: false,
+  }});
+
+  
+  // csrf token
+  app.get(['/csrf'], GetCsrfTokenMiddleware);
+
+  useContainerRoutingControllers(Container);
+  
+  // Http Request Exception
+  app.use(HttpRequestExceptionExpressHandler);
+
+}}
+
+  '''
+
+  expressjs_app_contents = '''\
+/**
+ * This is not a production server yet!
+ * This is only a minimal backend to get started.
+ */
+
+import express from 'express';
+import { bootstrapApp } from './app.init';
+
+const app = express();
+
+bootstrapApp(app).then(() => {
+  const PORT = process.env['PORT'] || 3000;
+
+  const server = app.listen(PORT, () => {
+    console.log(`Listening at http://localhost:${PORT}`);
+  });
+
+  server.on('error', (error) => {
+    console.error(error);
+  });
+});
+
+  '''
+
+
+  with open(f"src/app.controllers.ts", 'w') as f:
+    f.write(''.join(controllers_list_contents))
+
+  with open(f"src/app.init.ts", 'w') as f:
+    f.write(bootstrap_app_contents)
+
+  with open(f"src/app.ts", 'w') as f:
+    f.write(expressjs_app_contents)
   
 
 
