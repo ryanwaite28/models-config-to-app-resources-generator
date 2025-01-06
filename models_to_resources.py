@@ -23,6 +23,57 @@ my_merger = Merger(
     ["override"]
 )
 
+model_config_to_drizzle_type_map = {
+  'string': 'varchar',
+  'text': 'text',
+  'integer': 'integer',
+  'float': 'numeric',
+  'boolean': 'boolean',
+  'date': 'date',
+  'datetime': 'timestamp',
+  'time': 'time',
+  'json': 'json',
+  'jsonb': 'jsonb',
+}
+
+model_config_to_graphql_schema_type_map = {
+  'string': 'String',
+  'text': 'String',
+  'integer': 'Int',
+  'float': 'Float',
+  'boolean': 'Boolean',
+  'date': 'Date',
+  'datetime': 'Date',
+  'time': 'Date',
+  'json': 'String',
+  'jsonb': 'String',
+}
+
+model_config_to_graphql_object_type_map = {
+  'string': 'GraphQLString',
+  'text': 'GraphQLString',
+  'integer': 'GraphQLInt',
+  'float': 'GraphQLFloat',
+  'boolean': 'GraphQLBoolean',
+  'date': 'GraphQLDate',
+  'datetime': 'GraphQLDate',
+  'time': 'GraphQLDate',
+  'json': 'GraphQLString',
+  'jsonb': 'GraphQLString',
+}
+
+model_config_to_typescript_type_map = {
+  'string': 'string',
+  'text': 'string',
+  'integer': 'number',
+  'float': 'number',
+  'boolean': 'boolean',
+  'date': 'string',
+  'datetime': 'string',
+  'time': 'string',
+  'json': 'string',
+  'jsonb': 'string',
+}
 
 
 Path('generated-model-resources').mkdir(parents = True, exist_ok = True)
@@ -110,8 +161,9 @@ def format_dto_fields_for_query(f: str) -> str:
 user_owner_field_by_model = {}
 
 field_names_by_model: dict[list[str]] = {}
-relationships_definitions = []
+field_configs_by_model: dict[dict] = {}
 field_definitions_by_model: dict[list[str]] = {}
+relationships_definitions = []
 
 
 def makeModelVarName(model_name: str) -> str:
@@ -1103,11 +1155,59 @@ def getFieldDef(field, field_config):
   return f'{field}: {'string' if (field_config['dataType'] in ['string', 'text', 'datetime', 'uuid', 'json', 'jsonb']) else 'number' if (field_config['dataType'] in ['integer', 'float', 'double', 'number']) else 'boolean'}{' | null' if not (field_config['required']) else ''};'
 
 
+def getGraphqlSchemaType(model, field_name):
+  field_config = field_configs_by_model[model][field_name]
+  schema_type = model_config_to_graphql_schema_type_map[field_config['dataType']]
+  return schema_type
+
+def getGraphqlObjectType(model, field_name):
+  field_config = field_configs_by_model[model][field_name]
+  object_type = model_config_to_graphql_object_type_map[field_config['dataType']]
+  return object_type
+
+
+def getTypeScriptType(model, field_name):
+  field_config = field_configs_by_model[model][field_name]
+  typescript_type = model_config_to_typescript_type_map[field_config['dataType']]
+  return typescript_type
+
+
+def getDrizzleDef(model: str, field_name: str):
+  field_config = field_configs_by_model[model][field_name]
+  if (field_config['dataType'] == 'integer') and ('primaryKey' in field_config) and field_config['primaryKey'] == True:
+    return "integer().primaryKey().generatedAlwaysAsIdentity(),"
+  
+  column_def = ""
+  
+  drizzle_type = model_config_to_drizzle_type_map[field_config['dataType']]
+
+  column_def += f"{drizzle_type}({ f"{{ minLength: {field_config['minLength']}, maxLength: {field_config['maxLength']} }}" if ('minLength' in field_config and 'maxLength' in field_config) else f"{{ minLength: {field_config['minLength']} }}" if ('minLength' in field_config) else f"{{ maxLength: {field_config['maxLength']} }}" if ('maxLength' in field_config) else "" })"
+
+  if ('required' in field_config) and (field_config['required']):
+    column_def += ".notNull()"
+
+  if ('unique' in field_config) and (field_config['unique']):
+    column_def += ".unique()"
+
+  if ('defaultValue' in field_config):
+    if field_config['defaultValue'] == None:
+      column_def += ".default(null)"
+    elif field_config['defaultValue'] == "now":
+      column_def += ".defaultNow()"
+    else:
+      column_def += f".default({ f"\"{field_config['defaultValue']}\"" if (field_config['dataType'] in ['string', 'text', 'time', 'date', 'datetime']) else 'false' if (field_config['defaultValue'] == False) else 'true' if (field_config['defaultValue'] == True) else "null" if (field_config['defaultValue'] == None) else field_config['defaultValue'] })"
+
+  column_def += ","
+
+  return column_def
+
+
 def convert_models_to_resources():
   
   global user_owner_field_by_model
   global field_definitions_by_model
   global field_names_by_model
+  global field_configs_by_model
 
 
 
@@ -1157,6 +1257,9 @@ def convert_models_to_resources():
 
   models_file_cotents = []
   model_relationships_file_cotents = []
+  drizzle_file_cotents = []
+  
+  graphql_schema_file_cotents = []
   
   contents: dict = {}
 
@@ -1171,17 +1274,40 @@ def convert_models_to_resources():
     print("No models found in config.")
     return
   
+  Path(f"generated-model-resources/graphql/schemas").mkdir(parents = True, exist_ok = True)
+
+  
+  
   for model_name in model_names:
 
     model_config = contents.get("models", {}).get(model_name, {})
 
-    fields = model_config.get('fields', {})
+    field_configs = model_config.get('fields', {})
     
-    field_names = fields.keys()
+    field_names = field_configs.keys()
 
     field_names_by_model[model_name] = field_names
+    field_configs_by_model[model_name] = field_configs
 
-    field_definitions_by_model[model_name] = [getFieldDef(field, fields[field]) for field in field_names]
+    field_definitions_by_model[model_name] = [getFieldDef(field, field_configs[field]) for field in field_names]
+
+  
+  
+  for model_name in model_names:
+
+    kebob_name = camel_to_kebab(model_name)
+    snake_name = camel_to_snake(model_name)
+    
+    model_name_plural = pluralize(model_name)
+    
+    kebob_name_plural = pluralize(kebob_name)
+    
+    # --- #
+
+
+    fields = field_configs_by_model[model_name]
+    
+    field_names = fields.keys()
     
 
 
@@ -1197,38 +1323,168 @@ export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'},
   {'\n  '.join([ f"{field}: {{ type: DataTypes.{fields[field]['dataType'].upper()}, allowNull: {'false' if (fields[field]['required']) else 'true'}{', primaryKey: true, autoIncrement: true' if fields[field].get('primaryKey', False) else ''} }}," for field in field_names ])}
 }});
   '''
+    
+    graphql_model_schema_cotents = f'''\
+type {model_name} {{
+  {'\n  '.join([ f"{field}: {'Int' if ('number' in field_definitions_by_model[model_name][index]) else 'String' if ('string' in field_definitions_by_model[model_name][index]) else 'Boolean'}" for index, field in enumerate(field_names) ])}
+  <relationships>
+}}
+    '''
+    
+
+
+    drizzle_model_contents = f'''\
+export const {model_name_plural}Table = pgTable({f'"{model_config['tableName']}"'}, {{
+  {'\n  '.join([ f"{field_name}: {getDrizzleDef(model_name, field_name)}" for index, field_name in enumerate(fields) ])}
+}});
+  '''
+
+    graphql_model_object_contents = f'''\
+import {{
+  GraphQLFieldResolver,
+  GraphQLResolveInfo,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLInt,
+  GraphQLFieldConfig,
+  GraphQLBoolean,
+}} from 'graphql';
+import {{ Container }} from "typedi";
+
+export const Root{model_name}ByIdResolver: GraphQLFieldResolver<any, any> = (
+  source: any,
+  args: {{ id: number }},
+  context: any,
+  info: GraphQLResolveInfo
+) => {{
+  const {model_name}Repo: IModelCrud<{model_name}Entity> = Container.get({snake_name.upper()}_REPO_INJECT_TOKEN);
+  return {model_name}Repo.findById(args.id);
+}}
+
+export const {model_name}Schema = new GraphQLObjectType({{
+  name: '{model_name}',
+  fields: {{
+    {'\n    '.join([ f"{field}: {'{ type: GraphQLInt }' if ('number' in field_definitions_by_model[model_name][index]) else '{ type: GraphQLString }' if ('string' in field_definitions_by_model[model_name][index]) else '{ type: GraphQLBoolean }'}," for index, field in enumerate(fields) ])}
+    <relationships>
+  }},
+}});
+
+export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
+  type: {model_name}Schema,
+  args: {{
+    id: {{ type: GraphQLInt, description: `{model_name} Id` }}
+  }},
+  resolve: Root{model_name}ByIdResolver
+}};
+    '''
+
+
+
 # }}, {{ indexes: [{{ unique: f{'true' if model_config.get('indexes', {}).get('unique', False) else 'false'}, fields: [{ ', '.join([]) }] }}] }});
 
     relationships = relationships_definitions.get(model_name, None)
     if not relationships:
       interface_contents = interface_contents.replace("\n  <relationships>", "")
+      graphql_model_schema_cotents = graphql_model_schema_cotents.replace("\n  <relationships>", "")
+      graphql_model_object_contents = graphql_model_object_contents.replace("\n    <relationships>", "")
     else:
       relationship_contents = []
+      graphql_model_relationships_cotents = []
+      graphql_object_relationships_cotents = []
 
       relationshipsHasOne = relationships.get("hasOne", {})
       relationshipsHasMany = relationships.get("hasMany", {})
       relationshipsBelongsTo = relationships.get("belongsToOne", {})
       relationshipsBelongsToMany = relationships.get("belongsToMany", {})
 
-      for model in relationshipsHasOne.keys():
-        relationship_contents.append(f'{relationshipsHasOne[model]['alias']}?: {model}Entity;')
-        model_relationships_file_cotents.append(f'{model_name}.hasOne({model}, {{ as: "{relationshipsHasOne[model]['alias']}", foreignKey: "{relationshipsHasOne[model]['foreignKey']}", sourceKey: "{relationshipsHasOne[model]['sourceKey']}" }});')
+      for relation_model in relationshipsHasOne.keys():
+        graphql_object_relationships_cotents.append(f'''{relationshipsHasOne[relation_model]['alias']}: {{
+      type: {relation_model}Schema,
+      args: {{ {relationshipsHasOne[relation_model]['foreignKey']}: {{ type: {getGraphqlObjectType(relation_model, relationshipsHasOne[relation_model]['foreignKey'])} }} }},
+      resolve: (source: any, args: {{ {relationshipsHasOne[relation_model]['foreignKey']}: {getTypeScriptType(relation_model, relationshipsHasOne[relation_model]['foreignKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
+        const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
+        return {relation_model}Repo.findOne({{
+          where: {{ {relationshipsHasOne[relation_model]['foreignKey']}: source.{relationshipsHasOne[relation_model]['sourceKey']} }}
+        }});
+      }},
+    }},''')
+        graphql_model_relationships_cotents.append(f'{relationshipsHasOne[relation_model]['alias']}({relationshipsHasOne[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsHasOne[relation_model]['foreignKey'])}): {relation_model}')
+        relationship_contents.append(f'{relationshipsHasOne[relation_model]['alias']}?: {relation_model}Entity;')
+        model_relationships_file_cotents.append(f'{model_name}.hasOne({relation_model}, {{ as: "{relationshipsHasOne[relation_model]['alias']}", foreignKey: "{relationshipsHasOne[relation_model]['foreignKey']}", sourceKey: "{relationshipsHasOne[relation_model]['sourceKey']}" }});')
       
-      for model in relationshipsHasMany.keys():
-        relationship_contents.append(f'{relationshipsHasMany[model]['alias']}?: {model}Entity[];')
-        model_relationships_file_cotents.append(f'{model_name}.hasMany({model}, {{ as: "{relationshipsHasMany[model]['alias']}", foreignKey: "{relationshipsHasMany[model]['foreignKey']}", sourceKey: "{relationshipsHasMany[model]['sourceKey']}" }});')
-      
-      for model in relationshipsBelongsTo.keys():
-        relationship_contents.append(f'{relationshipsBelongsTo[model]['alias']}?: {model}Entity;')
-        model_relationships_file_cotents.append(f'{model_name}.belongsTo({model}, {{ as: "{relationshipsBelongsTo[model]['alias']}", foreignKey: "{relationshipsBelongsTo[model]['foreignKey']}", targetKey: "{relationshipsBelongsTo[model]['targetKey']}" }});')
-      
-      for model in relationshipsBelongsToMany.keys():
-        relationship_contents.append(f'{relationshipsBelongsToMany[model]['alias']}?: {model}Entity[];')
-        model_relationships_file_cotents.append(f'{model_name}.belongsToMany({model}, {{ as: "{relationshipsBelongsToMany[model]['alias']}", foreignKey: "{relationshipsBelongsToMany[model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[model]['targetKey']}" }});')
+      for relation_model in relationshipsHasMany.keys():
+        is_through_relation = relationshipsHasMany[relation_model].get('through', False)
+        use_relation_model = relationshipsHasMany[relation_model]['through'] if is_through_relation else relation_model
 
+        graphql_object_relationships_cotents.append(f'''{relationshipsHasMany[relation_model]['alias']}: {{
+      type: {relation_model}Schema,
+      args: {{ {relationshipsHasMany[relation_model]['foreignKey']}: {{ type: {getGraphqlObjectType(relation_model, relationshipsHasMany[relation_model]['foreignKey']) if not is_through_relation else getGraphqlObjectType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])} }} }},
+      resolve: (source: any, args: {{ {relationshipsHasMany[relation_model]['foreignKey']}: {getTypeScriptType(relation_model, relationshipsHasMany[relation_model]['foreignKey']) if not is_through_relation else getTypeScriptType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
+        const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
+        return {relation_model}Repo.findAll({{ {f'''
+          include: [{{
+            model: {relationshipsHasMany[relation_model]['through']},
+            where: {{ {relationshipsHasMany[relation_model]['foreignKey']}: source.{relationshipsHasMany[relation_model]['sourceKey']} }}
+          }}]''' 
+          if is_through_relation else f'''
+          where: {{ {relationshipsHasMany[relation_model]['foreignKey']}: source.{relationshipsHasMany[relation_model]['sourceKey']} }}\
+          '''}
+        }});
+      }},
+    }},''')
+        graphql_model_relationships_cotents.append(f'{relationshipsHasMany[relation_model]['alias']}({relationshipsHasMany[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsHasMany[relation_model]['foreignKey'])if not is_through_relation else getGraphqlSchemaType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])}): [{relation_model}]')
+        relationship_contents.append(f'{relationshipsHasMany[relation_model]['alias']}?: {relation_model}Entity[];')
+        model_relationships_file_cotents.append(f'{model_name}.hasMany({relation_model}, {{ as: "{relationshipsHasMany[relation_model]['alias']}", foreignKey: "{relationshipsHasMany[relation_model]['foreignKey']}", sourceKey: "{relationshipsHasMany[relation_model]['sourceKey']}" }});')
+      
+      for relation_model in relationshipsBelongsTo.keys():
+        graphql_object_relationships_cotents.append(f'''{relationshipsBelongsTo[relation_model]['alias']}: {{
+      type: {relation_model}Schema,
+      args: {{ {relationshipsBelongsTo[relation_model]['foreignKey']}: {{ type: {getGraphqlObjectType(relation_model, relationshipsBelongsTo[relation_model]['targetKey'])} }} }},
+      resolve: (source: any, args: {{ {relationshipsBelongsTo[relation_model]['targetKey']}: {getTypeScriptType(relation_model, relationshipsBelongsTo[relation_model]['targetKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
+        const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
+        return {relation_model}Repo.findOne({{
+          where: {{ {relationshipsBelongsTo[relation_model]['targetKey']}: args.{relationshipsBelongsTo[relation_model]['targetKey']} }}
+        }});
+      }},
+    }},''')
+        graphql_model_relationships_cotents.append(f'{relationshipsBelongsTo[relation_model]['alias']}({relationshipsBelongsTo[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsBelongsTo[relation_model]['targetKey'])}): {relation_model}')
+        relationship_contents.append(f'{relationshipsBelongsTo[relation_model]['alias']}?: {relation_model}Entity;')
+        model_relationships_file_cotents.append(f'{model_name}.belongsTo({relation_model}, {{ as: "{relationshipsBelongsTo[relation_model]['alias']}", foreignKey: "{relationshipsBelongsTo[relation_model]['foreignKey']}", targetKey: "{relationshipsBelongsTo[relation_model]['targetKey']}" }});')
+      
+      for relation_model in relationshipsBelongsToMany.keys():
+        is_through_relation = relationshipsBelongsToMany[relation_model].get('through', False)
+        
+        graphql_object_relationships_cotents.append(f'''{relationshipsBelongsToMany[relation_model]['alias']}: {{
+      type: {relation_model}Schema,
+      args: {{ {relationshipsBelongsToMany[relation_model]['foreignKey']}: {{ type: {getGraphqlObjectType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getGraphqlObjectType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['foreignKey'])} }} }},
+      resolve: (source: any, args: {{ {relationshipsBelongsToMany[relation_model]['targetKey']}: {getTypeScriptType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getTypeScriptType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['targetKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
+        const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
+        return {relation_model}Repo.findAll({{ {f'''
+          include: [{{
+            model: {relationshipsBelongsToMany[relation_model]['through']},
+            where: {{ {relationshipsBelongsToMany[relation_model]['foreignKey']}: args.{relationshipsBelongsToMany[relation_model]['foreignKey']} }}
+          }}]''' 
+          if is_through_relation else f'''
+          where: {{ {relationshipsBelongsToMany[relation_model]['targetKey']}: args.{relationshipsBelongsToMany[relation_model]['targetKey']} }}\
+          '''}
+        }});
+      }},
+    }},''')
+        graphql_model_relationships_cotents.append(f'{relationshipsBelongsToMany[relation_model]['alias']}({relationshipsBelongsToMany[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getGraphqlSchemaType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['foreignKey'])}): [{relation_model}]')
+        relationship_contents.append(f'{relationshipsBelongsToMany[relation_model]['alias']}?: {relation_model}Entity[];')
+        model_relationships_file_cotents.append(f'{model_name}.belongsToMany({relation_model}, {{ as: "{relationshipsBelongsToMany[relation_model]['alias']}", foreignKey: "{relationshipsBelongsToMany[relation_model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[relation_model]['targetKey']}" }});')
+
+      graphql_model_object_contents = graphql_model_object_contents.replace("<relationships>", "\n    " + "\n    ".join(graphql_object_relationships_cotents))
+      graphql_model_schema_cotents = graphql_model_schema_cotents.replace("<relationships>", "\n  " + "\n  ".join(graphql_model_relationships_cotents))
       interface_contents = interface_contents.replace("<relationships>", "\n  " + "\n  ".join(relationship_contents))
+
+    
+    with open(f"generated-model-resources/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
+      f.write(graphql_model_object_contents)
       
     interface_file_contents.append(interface_contents)
+    graphql_schema_file_cotents.append(graphql_model_schema_cotents)
+    drizzle_file_cotents.append(drizzle_model_contents)
 
     models_file_cotents.append(model_object_contents)
 
@@ -1253,15 +1509,23 @@ export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'},
       user_owner_field_by_model[model_name] = field
 
   joined_interface_contents = "\n\n".join(interface_file_contents)
+  joined_graphql_schema_contents = "\n\n".join(graphql_schema_file_cotents)
 
   models_file_cotents.extend(model_relationships_file_cotents)
   joined_model_object_contents = "\n\n".join(models_file_cotents)
+  joined_drizzle_contents = "\n\n".join(drizzle_file_cotents)
 
   with open(f"generated-model-resources/model-interfaces-converted.ts", 'w') as f:
     f.write(joined_interface_contents)
 
+  with open(f"generated-model-resources/schema.graphql", 'w') as f:
+    f.write(joined_graphql_schema_contents)
+
   with open(f"generated-model-resources/models.sequelize.ts", 'w') as f:
     f.write(joined_model_object_contents)
+
+  with open(f"generated-model-resources/schema.drizzle.ts", 'w') as f:
+    f.write(joined_drizzle_contents)
 
 
   model_types_contents = [
