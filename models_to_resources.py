@@ -1260,6 +1260,7 @@ def convert_models_to_resources():
   drizzle_file_cotents = []
   
   graphql_schema_file_cotents = []
+  graphql_root_schema_fields = []
   
   contents: dict = {}
 
@@ -1301,6 +1302,8 @@ def convert_models_to_resources():
     model_name_plural = pluralize(model_name)
     
     kebob_name_plural = pluralize(kebob_name)
+
+    model_var_name = model_name[0].lower() + model_name[1:]
     
     # --- #
 
@@ -1330,6 +1333,9 @@ type {model_name} {{
   <relationships>
 }}
     '''
+
+    graphql_root_schema_model_field = f'''{model_var_name}: Root{model_name}Query,'''
+    graphql_root_schema_fields.append(graphql_root_schema_model_field)
     
 
 
@@ -1400,7 +1406,6 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
       for relation_model in relationshipsHasOne.keys():
         graphql_object_relationships_cotents.append(f'''{relationshipsHasOne[relation_model]['alias']}: {{
       type: {relation_model}Schema,
-      args: {{ {relationshipsHasOne[relation_model]['foreignKey']}: {{ type: {getGraphqlObjectType(relation_model, relationshipsHasOne[relation_model]['foreignKey'])} }} }},
       resolve: (source: any, args: {{ {relationshipsHasOne[relation_model]['foreignKey']}: {getTypeScriptType(relation_model, relationshipsHasOne[relation_model]['foreignKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
         const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
         return {relation_model}Repo.findOne({{
@@ -1418,7 +1423,6 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
 
         graphql_object_relationships_cotents.append(f'''{relationshipsHasMany[relation_model]['alias']}: {{
       type: {relation_model}Schema,
-      args: {{ {relationshipsHasMany[relation_model]['foreignKey']}: {{ type: {getGraphqlObjectType(relation_model, relationshipsHasMany[relation_model]['foreignKey']) if not is_through_relation else getGraphqlObjectType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])} }} }},
       resolve: (source: any, args: {{ {relationshipsHasMany[relation_model]['foreignKey']}: {getTypeScriptType(relation_model, relationshipsHasMany[relation_model]['foreignKey']) if not is_through_relation else getTypeScriptType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
         const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
         return {relation_model}Repo.findAll({{ {f'''
@@ -1439,11 +1443,10 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
       for relation_model in relationshipsBelongsTo.keys():
         graphql_object_relationships_cotents.append(f'''{relationshipsBelongsTo[relation_model]['alias']}: {{
       type: {relation_model}Schema,
-      args: {{ {relationshipsBelongsTo[relation_model]['foreignKey']}: {{ type: {getGraphqlObjectType(relation_model, relationshipsBelongsTo[relation_model]['targetKey'])} }} }},
       resolve: (source: any, args: {{ {relationshipsBelongsTo[relation_model]['targetKey']}: {getTypeScriptType(relation_model, relationshipsBelongsTo[relation_model]['targetKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
         const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
         return {relation_model}Repo.findOne({{
-          where: {{ {relationshipsBelongsTo[relation_model]['targetKey']}: args.{relationshipsBelongsTo[relation_model]['targetKey']} }}
+          where: {{ {relationshipsBelongsTo[relation_model]['targetKey']}: source.{relationshipsBelongsTo[relation_model]['foreignKey']} }}
         }});
       }},
     }},''')
@@ -1456,16 +1459,15 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
         
         graphql_object_relationships_cotents.append(f'''{relationshipsBelongsToMany[relation_model]['alias']}: {{
       type: {relation_model}Schema,
-      args: {{ {relationshipsBelongsToMany[relation_model]['foreignKey']}: {{ type: {getGraphqlObjectType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getGraphqlObjectType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['foreignKey'])} }} }},
       resolve: (source: any, args: {{ {relationshipsBelongsToMany[relation_model]['targetKey']}: {getTypeScriptType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getTypeScriptType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['targetKey'])} }}, context: any, info: GraphQLResolveInfo) => {{
         const {relation_model}Repo: IModelCrud<{relation_model}Entity> = Container.get({camel_to_snake(relation_model).upper()}_REPO_INJECT_TOKEN);
         return {relation_model}Repo.findAll({{ {f'''
           include: [{{
             model: {relationshipsBelongsToMany[relation_model]['through']},
-            where: {{ {relationshipsBelongsToMany[relation_model]['foreignKey']}: args.{relationshipsBelongsToMany[relation_model]['foreignKey']} }}
+            where: {{ {relationshipsBelongsToMany[relation_model]['foreignKey']}: source.{relationshipsBelongsToMany[relation_model]['foreignKey']} }}
           }}]''' 
           if is_through_relation else f'''
-          where: {{ {relationshipsBelongsToMany[relation_model]['targetKey']}: args.{relationshipsBelongsToMany[relation_model]['targetKey']} }}\
+          where: {{ {relationshipsBelongsToMany[relation_model]['targetKey']}: source.{relationshipsBelongsToMany[relation_model]['foreignKey']} }}\
           '''}
         }});
       }},
@@ -1515,11 +1517,27 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
   joined_model_object_contents = "\n\n".join(models_file_cotents)
   joined_drizzle_contents = "\n\n".join(drizzle_file_cotents)
 
+  graphql_root_schema_contents = f'''\
+export const rootGraphqlSchema = new GraphQLSchema({{
+
+  query: new GraphQLObjectType({{
+    name: 'RootQueryType',
+    fields: {{
+      {'\n      '.join([schema_field for schema_field in graphql_root_schema_fields])}
+    }},
+  }}),
+
+}});
+  '''
+
   with open(f"generated-model-resources/model-interfaces-converted.ts", 'w') as f:
     f.write(joined_interface_contents)
 
   with open(f"generated-model-resources/schema.graphql", 'w') as f:
     f.write(joined_graphql_schema_contents)
+
+  with open(f"generated-model-resources/graphql/root.schema.ts", 'w') as f:
+      f.write(graphql_root_schema_contents)
 
   with open(f"generated-model-resources/models.sequelize.ts", 'w') as f:
     f.write(joined_model_object_contents)

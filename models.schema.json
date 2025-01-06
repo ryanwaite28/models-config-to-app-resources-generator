@@ -126,7 +126,8 @@
                   "properties": {
                     "alias": { "type": "string" },
                     "foreignKey": { "type": "string" },
-                    "sourceKey": { "type": "string" }
+                    "sourceKey": { "type": "string" },
+                    "through": { "type": "string" }
                   }
                 }
               }
@@ -152,7 +153,8 @@
                   "properties": {
                     "alias": { "type": "string" },
                     "foreignKey": { "type": "string" },
-                    "targetKey": { "type": "string" }
+                    "targetKey": { "type": "string" },
+                    "through": { "type": "string" }
                   }
                 }
               }

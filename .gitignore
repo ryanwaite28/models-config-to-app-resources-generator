@@ -1,0 +1,3 @@
+generated-model-resources
+generated-model-resources/**/*.ts
+*.graphql

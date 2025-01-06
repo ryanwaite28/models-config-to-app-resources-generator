@@ -48,6 +48,7 @@ export interface UserEntity extends _BaseEntity {
   
   icon?: S3ObjectEntity;
   authProviders?: UserAuthProviderEntity[];
+  user_tags?: TagEntity[];
 }
   
 
@@ -74,6 +75,8 @@ export interface TagEntity extends _BaseEntity {
   deleted_at: string | null;
   name: string;
   description: string | null;
+  
+  users?: UserEntity[];
 }
   
 

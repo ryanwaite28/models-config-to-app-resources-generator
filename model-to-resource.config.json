@@ -118,7 +118,8 @@
         "S3Object": { "alias": "icon", "foreignKey": "id", "sourceKey": "icon_s3object_id" }
       },
       "hasMany": {
-        "UserAuthProvider": { "alias": "authProviders", "foreignKey": "user_id", "sourceKey": "id" }
+        "UserAuthProvider": { "alias": "authProviders", "foreignKey": "user_id", "sourceKey": "id" },
+        "Tag": { "alias": "user_tags", "foreignKey": "user_id", "sourceKey": "id", "through": "UserTag" }
       }
     },
 
@@ -132,6 +133,12 @@
       "belongsToOne": {
         "User": { "alias": "user", "foreignKey": "user_id", "targetKey": "id" },
         "Tag": { "alias": "tag", "foreignKey": "tag_id", "targetKey": "id" }
+      }
+    },
+
+    "Tag": {
+      "belongsToMany": {
+        "User": { "alias": "users", "foreignKey": "user_id", "targetKey": "id", "through": "UserTag" }
       }
     }
   }

@@ -1,4 +1,4 @@
-export const S3Object = sequelize.define("s3objects", {
+export const S3Object = sequelize.define("user_tags", {
   id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true },
   metadata: { type: DataTypes.JSONB, allowNull: true },
   create_at: { type: DataTypes.DATETIME, allowNull: false },
@@ -14,7 +14,7 @@ export const S3Object = sequelize.define("s3objects", {
 });
   
 
-export const User = sequelize.define("users", {
+export const User = sequelize.define("user_tags", {
   id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true },
   metadata: { type: DataTypes.JSONB, allowNull: true },
   create_at: { type: DataTypes.DATETIME, allowNull: false },
@@ -41,7 +41,7 @@ export const User = sequelize.define("users", {
 });
   
 
-export const UserAuthProvider = sequelize.define("user_auth_providers", {
+export const UserAuthProvider = sequelize.define("user_tags", {
   id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true },
   metadata: { type: DataTypes.JSONB, allowNull: true },
   create_at: { type: DataTypes.DATETIME, allowNull: false },
@@ -54,7 +54,7 @@ export const UserAuthProvider = sequelize.define("user_auth_providers", {
 });
   
 
-export const Tag = sequelize.define("tags", {
+export const Tag = sequelize.define("user_tags", {
   id: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true, autoIncrement: true },
   metadata: { type: DataTypes.JSONB, allowNull: true },
   create_at: { type: DataTypes.DATETIME, allowNull: false },
@@ -80,7 +80,11 @@ User.hasOne(S3Object, { as: "icon", foreignKey: "id", sourceKey: "icon_s3object_
 
 User.hasMany(UserAuthProvider, { as: "authProviders", foreignKey: "user_id", sourceKey: "id" });
 
+User.hasMany(Tag, { as: "user_tags", foreignKey: "user_id", sourceKey: "id" });
+
 UserAuthProvider.belongsTo(User, { as: "user", foreignKey: "user_id", targetKey: "id" });
+
+Tag.belongsToMany(User, { as: "users", foreignKey: "user_id", targetKey: "id" });
 
 UserTag.belongsTo(User, { as: "user", foreignKey: "user_id", targetKey: "id" });
 
