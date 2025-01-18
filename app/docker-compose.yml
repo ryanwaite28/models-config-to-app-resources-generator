@@ -193,6 +193,6 @@ services:
   #     - '4000:4000'
   #   volumes:
   #     - /app/node_modules
-  #     - './src:/app/src'
+  #     - './src:/{root_path}'
   #     - './app-logs:/app/logs'
 

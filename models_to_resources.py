@@ -1169,7 +1169,7 @@ def getDrizzleDef(model: str, field_name: str):
   
   drizzle_type = model_config_to_drizzle_type_map[field_config['dataType']]
 
-  column_def += f"{drizzle_type}({ f"{{ minLength: {field_config['minLength']}, maxLength: {field_config['maxLength']} }}" if ('minLength' in field_config and 'maxLength' in field_config) else f"{{ minLength: {field_config['minLength']} }}" if ('minLength' in field_config) else f"{{ maxLength: {field_config['maxLength']} }}" if ('maxLength' in field_config) else "" })"
+  column_def += f"{drizzle_type}({ f"{{ length: {field_config['maxLength']} }}" if ('minLength' in field_config and 'maxLength' in field_config) else f"{{ length: {field_config['minLength']} }}" if ('minLength' in field_config) else f"{{ length: {field_config['maxLength']} }}" if ('maxLength' in field_config) else "" })"
 
   if ('required' in field_config) and (field_config['required']):
     column_def += ".notNull()"
@@ -2418,7 +2418,7 @@ bootstrapApp(app).then(() => {
 ''')
     
   with open(f"app/docker-compose.yml", 'w') as f:
-    f.write('''
+    f.write(f'''
 version: "3.8"
 
 networks:
@@ -2463,7 +2463,7 @@ services:
   #     splunknet:
   #       aliases:
   #         - uf1
-  #   image: ${UF_IMAGE:-splunk/universalforwarder:latest}
+  #   image: ${{UF_IMAGE:-splunk/universalforwarder:latest}}
   #   hostname: uf1
   #   container_name: uf1
   #   environment:
@@ -2479,7 +2479,7 @@ services:
   #     splunknet:
   #       aliases:
   #         - so1
-  #   image: ${SPLUNK_IMAGE:-splunk/splunk:latest}
+  #   image: ${{SPLUNK_IMAGE:-splunk/splunk:latest}}
   #   hostname: so1
   #   container_name: so1
   #   environment:
@@ -2503,7 +2503,7 @@ services:
   #     - "0.0.0.0:4510-4559:4510-4559"  # external services port range
   #   environment:
   #     # LocalStack configuration: https://docs.localstack.cloud/references/configuration/
-  #     DEBUG: ${DEBUG:-1}
+  #     DEBUG: ${{DEBUG:-1}}
   #     AWS_DEFAULT_REGION: us-east-1
   #   volumes:
   #     # - "localstack-vol:/var/lib/localstack"
@@ -2613,7 +2613,7 @@ services:
   #     - '4000:4000'
   #   volumes:
   #     - /app/node_modules
-  #     - './src:/{root_path}'
+  #     - f'./src:/{root_path}'
   #     - './app-logs:/app/logs'
 
 ''')
