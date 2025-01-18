@@ -40,6 +40,8 @@
         "stripe_identity_verified": { "dataType": "boolean", "required": true, "defaultValue": false },
         "first_name": { "dataType": "string", "required": false },
         "last_name": { "dataType": "string", "required": false },
+        "email": { "dataType": "string", "required": false },
+        "password": { "dataType": "string", "required": false },
         "bio": { "dataType": "string", "required": false },
         "icon_s3object_id": { "dataType": "integer", "required": false, "unique": true },
         "town": { "dataType": "string", "required": false },
@@ -53,7 +55,9 @@
         "email_verified": { "dataType": "boolean", "required": true, "defaultValue": false },
         "phone_verified": { "dataType": "boolean", "required": true, "defaultValue": false }
       },
-      "indexes": []
+      "indexes": [
+        { "fields": ["email"], "unique": true }
+      ]
     },
 
     "UserAuthProvider": {
@@ -107,7 +111,9 @@
         "User": { "relationType": "belongsTo", "model": "User", "alias": "user", "foreignKey": "user_id", "sourceKey": "id" },
         "Tag": { "relationType": "belongsTo", "model": "Tag", "alias": "tag", "foreignKey": "tag_id", "sourceKey": "id" }
       },
-      "indexes": []
+      "indexes": [
+        { "fields": ["user_id", "tag_id"], "unique": true }
+      ]
     }
 
   },

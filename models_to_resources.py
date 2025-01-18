@@ -1245,7 +1245,14 @@ def convert_models_to_resources():
 
   models_file_cotents = []
   model_relationships_file_cotents = []
-  drizzle_file_cotents = []
+  drizzle_file_cotents = [
+    '''\
+import { pgTable, serial, integer, text, boolean, timestamp, jsonb, varchar } from 'drizzle';
+import { relations } from 'drizzle-orm';
+
+    ''',
+  ]
+  drizzle_relationship_contents = []
   
   graphql_schema_file_cotents = []
   graphql_root_schema_fields = []
@@ -1286,6 +1293,9 @@ def convert_models_to_resources():
   
   for model_name in model_names:
 
+    model_config = contents.get("models", {}).get(model_name, {})
+    field_configs = model_config.get('fields', {})
+
     kebob_name = camel_to_kebab(model_name)
     snake_name = camel_to_snake(model_name)
     
@@ -1312,9 +1322,13 @@ export interface {model_name}Entity extends _BaseEntity {{
   '''
     
     model_object_contents = f'''\
-export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'}, {{
+export const {model_name} = sequelize.define({f'"{model_config['tableName']}"'}, { '{' }
   {'\n  '.join([ f"{field}: {{ type: DataTypes.{fields[field]['dataType'].upper()}, allowNull: {'false' if (fields[field]['required']) else 'true'}{', primaryKey: true, autoIncrement: true' if fields[field].get('primaryKey', False) else ''} }}," for field in field_names ])}
-}});
+{ '});' if len(model_config.get('indexes', [])) == 0 else "}, " + f'''{{
+  indexes: [
+    {'\n    '.join([ f"{{ unique: {'true' if index.get('unique', False) else 'false'}, fields: [{ ', '.join([f'"{field}"' for field in index.get('fields', [])]) }] }}" for index in model_config.get('indexes', []) ])}
+  ]
+}});''' } 
   '''
     
     graphql_model_schema_cotents = f'''\
@@ -1330,7 +1344,7 @@ type {model_name} {{
 
 
     drizzle_model_contents = f'''\
-export const {model_name_plural}Table = pgTable({f'"{model_config['tableName']}"'}, {{
+export const {model_name_plural} = pgTable({f'"{model_config['tableName']}"'}, {{
   {'\n  '.join([ f"{field_name}: {getDrizzleDef(model_name, field_name)}" for index, field_name in enumerate(fields) ])}
 }});
   '''
@@ -1405,6 +1419,12 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
     }},''')
         graphql_model_relationships_cotents.append(f'{relationshipsHasOne[relation_model]['alias']}({relationshipsHasOne[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsHasOne[relation_model]['foreignKey'])}): {relation_model}')
         relationship_contents.append(f'{relationshipsHasOne[relation_model]['alias']}?: {relation_model}Entity;')
+        drizzle_relationship_contents.append(f'''export const {model_name}To{relation_model}Relation = relations({pluralize(relation_model)}, ({{ one }}) => ({{
+	{relationshipsHasOne[relation_model]['alias']}: one({pluralize(relation_model)}{ f''', {{
+		fields: [{pluralize(relation_model)}.{relationshipsHasOne[relation_model]['foreignKey']}],
+		references: [{model_name_plural}.{relationshipsHasOne[relation_model]['sourceKey']}],
+	}})''' }
+}}));''')
         model_relationships_file_cotents.append(f'{model_name}.hasOne({relation_model}, {{ as: "{relationshipsHasOne[relation_model]['alias']}", foreignKey: "{relationshipsHasOne[relation_model]['foreignKey']}", sourceKey: "{relationshipsHasOne[relation_model]['sourceKey']}" }});')
       
       for relation_model in relationshipsHasMany.keys():
@@ -1428,6 +1448,12 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
     }},''')
         graphql_model_relationships_cotents.append(f'{relationshipsHasMany[relation_model]['alias']}({relationshipsHasMany[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsHasMany[relation_model]['foreignKey'])if not is_through_relation else getGraphqlSchemaType(relationshipsHasMany[relation_model]['through'], relationshipsHasMany[relation_model]['foreignKey'])}): [{relation_model}]')
         relationship_contents.append(f'{relationshipsHasMany[relation_model]['alias']}?: {relation_model}Entity[];')
+        drizzle_relationship_contents.append(f'''export const {model_name}To{relation_model}Relations = relations({pluralize(relation_model)}, ({{ many }}) => ({{
+	{relationshipsHasMany[relation_model]['alias']}: many({pluralize(relation_model)}{ f''', {{
+		fields: [{pluralize(relation_model)}.{relationshipsHasMany[relation_model]['foreignKey']}],
+		references: [{model_name_plural}.{relationshipsHasMany[relation_model]['sourceKey']}],
+	}})''' }
+}}));''')
         model_relationships_file_cotents.append(f'{model_name}.hasMany({relation_model}, {{ as: "{relationshipsHasMany[relation_model]['alias']}", foreignKey: "{relationshipsHasMany[relation_model]['foreignKey']}", sourceKey: "{relationshipsHasMany[relation_model]['sourceKey']}"{f', through: "{relationshipsHasMany[relation_model]['through']}"' if is_through_relation else ''} }});')
       
       for relation_model in relationshipsBelongsTo.keys():
@@ -1442,6 +1468,12 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
     }},''')
         graphql_model_relationships_cotents.append(f'{relationshipsBelongsTo[relation_model]['alias']}({relationshipsBelongsTo[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsBelongsTo[relation_model]['targetKey'])}): {relation_model}')
         relationship_contents.append(f'{relationshipsBelongsTo[relation_model]['alias']}?: {relation_model}Entity;')
+        drizzle_relationship_contents.append(f'''export const {model_name}To{relation_model}Relation = relations({pluralize(relation_model)}, ({{ one }}) => ({{
+	{relationshipsBelongsTo[relation_model]['alias']}: one({pluralize(relation_model)}{ f''', {{
+		fields: [{pluralize(relation_model)}.{relationshipsBelongsTo[relation_model]['targetKey']}],
+		references: [{model_name_plural}.{relationshipsBelongsTo[relation_model]['foreignKey']}],
+	}})''' }
+}}));''')
         model_relationships_file_cotents.append(f'{model_name}.belongsTo({relation_model}, {{ as: "{relationshipsBelongsTo[relation_model]['alias']}", foreignKey: "{relationshipsBelongsTo[relation_model]['foreignKey']}", targetKey: "{relationshipsBelongsTo[relation_model]['targetKey']}" }});')
       
       for relation_model in relationshipsBelongsToMany.keys():
@@ -1464,6 +1496,12 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
     }},''')
         graphql_model_relationships_cotents.append(f'{relationshipsBelongsToMany[relation_model]['alias']}({relationshipsBelongsToMany[relation_model]['foreignKey']}: {getGraphqlSchemaType(relation_model, relationshipsBelongsToMany[relation_model]['targetKey']) if not is_through_relation else getGraphqlSchemaType(relationshipsBelongsToMany[relation_model]['through'], relationshipsBelongsToMany[relation_model]['foreignKey'])}): [{relation_model}]')
         relationship_contents.append(f'{relationshipsBelongsToMany[relation_model]['alias']}?: {relation_model}Entity[];')
+        drizzle_relationship_contents.append(f'''export const {model_name}To{relation_model}Relation = relations({pluralize(relation_model)}, ({{ one }}) => ({{
+	{relationshipsBelongsToMany[relation_model]['alias']}: one({pluralize(relation_model)}{ f''', {{
+		fields: [{pluralize(relation_model)}.{relationshipsBelongsToMany[relation_model]['targetKey']}],
+		references: [{model_name_plural}.{relationshipsBelongsToMany[relation_model]['foreignKey']}],
+	}})''' }
+}}));''')
         model_relationships_file_cotents.append(f'{model_name}.belongsToMany({relation_model}, {{ as: "{relationshipsBelongsToMany[relation_model]['alias']}", foreignKey: "{relationshipsBelongsToMany[relation_model]['foreignKey']}", targetKey: "{relationshipsBelongsToMany[relation_model]['targetKey']}"{f', through: "{relationshipsBelongsToMany[relation_model]['through']}"' if is_through_relation else ''} }});')
 
       graphql_model_object_contents = graphql_model_object_contents.replace("<relationships>", "\n    " + "\n    ".join(graphql_object_relationships_cotents))
@@ -1503,7 +1541,18 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
   joined_interface_contents = "\n\n".join(interface_file_contents)
   joined_graphql_schema_contents = "\n\n".join(graphql_schema_file_cotents)
 
+  models_file_cotents.append('''\
+
+/* --- Relationships --- */
+
+''')
   models_file_cotents.extend(model_relationships_file_cotents)
+  drizzle_file_cotents.append('''\
+
+/* --- Relationships --- */
+
+''')
+  drizzle_file_cotents.extend(drizzle_relationship_contents)
   joined_model_object_contents = "\n\n".join(models_file_cotents)
   joined_drizzle_contents = "\n\n".join(drizzle_file_cotents)
 
