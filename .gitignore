@@ -1,5 +1,5 @@
-app/src
-app/src/**/*.ts
+app/
+app/**/*.ts
 generated-model-resources
 generated-model-resources/**/*.ts
 *.graphql

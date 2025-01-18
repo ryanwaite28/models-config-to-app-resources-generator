@@ -75,8 +75,9 @@ model_config_to_typescript_type_map = {
   'jsonb': 'string',
 }
 
+root_path = 'app/generated-src'
 
-Path('app/src').mkdir(parents = True, exist_ok = True)
+Path(root_path).mkdir(parents = True, exist_ok = True)
 
 
 
@@ -498,7 +499,7 @@ def create_resource(
   singular_caps = singular.capitalize()
   plural_caps = plural.capitalize()
   
-  base_path = 'app/src/resources'
+  base_path = f'{root_path}/resources'
 
 
 
@@ -1111,29 +1112,29 @@ export class Search{model_name}Dto implements Partial<{model_name}Entity> {{
 
   # add copy to src for reference
   
-  Path(f"app/src/resources/{kebob_name_plural}").mkdir(parents = True, exist_ok = True)
-  Path(f"app/src/resources/{kebob_name_plural}/dto").mkdir(parents = True, exist_ok = True)
-  Path(f"app/src/resources/{kebob_name_plural}/dto/validations").mkdir(parents = True, exist_ok = True)
+  Path(f"{root_path}/resources/{kebob_name_plural}").mkdir(parents = True, exist_ok = True)
+  Path(f"{root_path}/resources/{kebob_name_plural}/dto").mkdir(parents = True, exist_ok = True)
+  Path(f"{root_path}/resources/{kebob_name_plural}/dto/validations").mkdir(parents = True, exist_ok = True)
 
-  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.controller.ts"), 'w') as f:
+  with open(Path(f"{root_path}/resources/{kebob_name_plural}/{kebob_name_plural}.controller.ts"), 'w') as f:
     f.write(controller_contents)
   
-  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.guard.ts"), 'w') as f:
+  with open(Path(f"{root_path}/resources/{kebob_name_plural}/{kebob_name_plural}.guard.ts"), 'w') as f:
     f.write(guard_contents)
   
-  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.service.ts"), 'w') as f:
+  with open(Path(f"{root_path}/resources/{kebob_name_plural}/{kebob_name_plural}.service.ts"), 'w') as f:
     f.write(service_contents)
   
-  with open(Path(f"app/src/resources/{kebob_name_plural}/{kebob_name_plural}.repository.ts"), 'w') as f:
+  with open(Path(f"{root_path}/resources/{kebob_name_plural}/{kebob_name_plural}.repository.ts"), 'w') as f:
     f.write(repository_contents)
   
-  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.create.dto.ts"), 'w') as f:
+  with open(Path(f"{root_path}/resources/{kebob_name_plural}/dto/{kebob_name_plural}.create.dto.ts"), 'w') as f:
     f.write(create_dto_contents)
   
-  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.update.dto.ts"), 'w') as f:
+  with open(Path(f"{root_path}/resources/{kebob_name_plural}/dto/{kebob_name_plural}.update.dto.ts"), 'w') as f:
     f.write(update_dto_contents)
   
-  with open(Path(f"app/src/resources/{kebob_name_plural}/dto/{kebob_name_plural}.search.dto.ts"), 'w') as f:
+  with open(Path(f"{root_path}/resources/{kebob_name_plural}/dto/{kebob_name_plural}.search.dto.ts"), 'w') as f:
     f.write(search_dto_contents)
   
 
@@ -1272,7 +1273,7 @@ import { relations } from 'drizzle-orm';
   
   global_model_names = model_names
   
-  Path(f"app/src/graphql/schemas").mkdir(parents = True, exist_ok = True)
+  Path(f"{root_path}/graphql/schemas").mkdir(parents = True, exist_ok = True)
 
   
   
@@ -1509,7 +1510,7 @@ export const Root{model_name}Query: GraphQLFieldConfig<any, any> = {{
       interface_contents = interface_contents.replace("<relationships>", "\n  " + "\n  ".join(relationship_contents))
 
     
-    with open(f"app/src/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
+    with open(f"{root_path}/graphql/schemas/{kebob_name_plural}.schema.ts", 'w') as f:
       f.write(graphql_model_object_contents)
       
     interface_file_contents.append(interface_contents)
@@ -1569,19 +1570,19 @@ export const rootGraphqlSchema = new GraphQLSchema({{
 }});
   '''
 
-  with open(f"app/src/model-interfaces-converted.ts", 'w') as f:
+  with open(f"{root_path}/model-interfaces-converted.ts", 'w') as f:
     f.write(joined_interface_contents)
 
-  with open(f"app/src/schema.graphql", 'w') as f:
+  with open(f"{root_path}/schema.graphql", 'w') as f:
     f.write(joined_graphql_schema_contents)
 
-  with open(f"app/src/graphql/root.schema.ts", 'w') as f:
+  with open(f"{root_path}/graphql/root.schema.ts", 'w') as f:
       f.write(graphql_root_schema_contents)
 
-  with open(f"app/src/models.sequelize.ts", 'w') as f:
+  with open(f"{root_path}/models.sequelize.ts", 'w') as f:
     f.write(joined_model_object_contents)
 
-  with open(f"app/src/schema.drizzle.ts", 'w') as f:
+  with open(f"{root_path}/schema.drizzle.ts", 'w') as f:
     f.write(joined_drizzle_contents)
 
 
@@ -1593,7 +1594,7 @@ export const rootGraphqlSchema = new GraphQLSchema({{
     model_types_contents.append(f'  {snake_name.upper()} = "{snake_name.upper()}",\n')
   model_types_contents.append('}\n')
     
-  with open(f"app/src/model-types-converted.enum.ts", 'w') as f:
+  with open(f"{root_path}/model-types-converted.enum.ts", 'w') as f:
     f.write(''.join(model_types_contents))
 
   
@@ -2083,16 +2084,16 @@ export class AwsS3Service implements IAwsS3Service {
   
 
   
-  with open(f"app/src/repository.service.ts", 'w') as f:
+  with open(f"{root_path}/repository.service.ts", 'w') as f:
     f.write(''.join(repository_service_contents))
 
-  with open(f"app/src/openapi.json", 'w') as f:
+  with open(f"{root_path}/openapi.json", 'w') as f:
     f.write(json.dumps(openapi_specs, indent = 2))
 
-  with open(f"app/src/common.regex.ts", 'w') as f:
+  with open(f"{root_path}/common.regex.ts", 'w') as f:
     f.write(regex_contents)
 
-  with open(f"app/src/s3.aws.ts", 'w') as f:
+  with open(f"{root_path}/s3.aws.ts", 'w') as f:
     f.write(aws_s3_service)
 
 
@@ -2233,13 +2234,13 @@ bootstrapApp(app).then(() => {
   '''
 
 
-  with open(f"app/src/app.controllers.ts", 'w') as f:
+  with open(f"{root_path}/app.controllers.ts", 'w') as f:
     f.write(''.join(controllers_list_contents))
 
-  with open(f"app/src/app.init.ts", 'w') as f:
+  with open(f"{root_path}/app.init.ts", 'w') as f:
     f.write(bootstrap_app_contents)
 
-  with open(f"app/src/app.ts", 'w') as f:
+  with open(f"{root_path}/app.ts", 'w') as f:
     f.write(expressjs_app_contents)
 
 
@@ -2612,7 +2613,7 @@ services:
   #     - '4000:4000'
   #   volumes:
   #     - /app/node_modules
-  #     - './src:/app/src'
+  #     - './src:/{root_path}'
   #     - './app-logs:/app/logs'
 
 ''')
