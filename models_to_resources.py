@@ -1248,7 +1248,7 @@ def convert_models_to_resources():
   model_relationships_file_cotents = []
   drizzle_file_cotents = [
     '''\
-import { pgTable, serial, integer, text, boolean, timestamp, jsonb, varchar } from 'drizzle';
+import { pgTable, serial, integer, text, boolean, timestamp, jsonb, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
     ''',
